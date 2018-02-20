@@ -212,7 +212,7 @@ namespace EasyOgreExporter
     IGameMesh* m_GameMesh;
     IGameNode* m_GameNode;
     IGameSkin* m_GameSkin;
-    Ogre::Mesh* m_Mesh;
+    Ogre::v1::Mesh* m_Mesh;
     MorphR3* m_pMorphR3;
     Box3 m_Bounding;
     float m_SphereRadius;
@@ -245,9 +245,9 @@ namespace EasyOgreExporter
   protected:
     void prepareMesh(Mesh* mMesh);
     std::vector<ExFace> GetFacesByMaterialId(int matId);
-    Ogre::SubMesh* createOgreSubmesh(ExSubMesh submesh);
+    Ogre::v1::SubMesh* createOgreSubmesh(ExSubMesh submesh);
     bool createOgreSharedGeometry();
-    void buildOgreGeometry(Ogre::VertexData* vdata, std::vector<ExVertex> verticesList);
+    void buildOgreGeometry(Ogre::v1::VertexData* vdata, std::vector<ExVertex> verticesList);
 		ExMaterial* loadMaterial(IGameMaterial* pGameMaterial);
     void getModifiers();
     void createPoses();

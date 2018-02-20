@@ -92,9 +92,9 @@ namespace EasyOgreExporter
 		//load a keyframe for a particular joint at current time
 		skeletonKeyframe loadKeyframe(ExBone& j, int time);
 		//write joints to an Ogre skeleton
-		bool createOgreBones(Ogre::SkeletonPtr pSkeleton);
+		bool createOgreBones(Ogre::v1::SkeletonPtr pSkeleton);
 		// write skeleton animations to an Ogre skeleton
-		bool createOgreSkeletonAnimations(Ogre::SkeletonPtr pSkeleton);
+		bool createOgreSkeletonAnimations(Ogre::v1::SkeletonPtr pSkeleton);
     //load a joint
 		bool loadJoint(INode* pNode);
 

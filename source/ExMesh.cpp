@@ -439,10 +439,10 @@ namespace EasyOgreExporter
       pIgnoreLod->GetPropertyValue(ignoreLOD);
 
     // Construct mesh
-    Ogre::MeshPtr pMesh;
+    Ogre::v1::MeshPtr pMesh;
     try
     {
-      pMesh = Ogre::MeshManager::getSingleton().createManual(m_name.c_str(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+      pMesh = Ogre::v1::MeshManager::getSingleton().createManual(m_name.c_str(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     }
     catch(Ogre::Exception &e)
     {
@@ -450,7 +450,7 @@ namespace EasyOgreExporter
       return false;
     }
 
-    // set Ogre::Mesh*
+    // set Ogre::v1::Mesh*
     m_Mesh = pMesh.getPointer();
 
     // Write shared geometry data
@@ -482,7 +482,7 @@ namespace EasyOgreExporter
       }
 
       EasyOgreExporterLog("Info: create submesh : %s\n", subName.c_str());
-      Ogre::SubMesh* pSubmesh = createOgreSubmesh(subMesh);
+      Ogre::v1::SubMesh* pSubmesh = createOgreSubmesh(subMesh);
       m_Mesh->nameSubMesh(subName, i);
     }
 
@@ -490,7 +490,7 @@ namespace EasyOgreExporter
     if(isFirstInstance(m_GameNode) == false)
     {
       EasyOgreExporterLog("Info: Ignore instanciated mesh\n");
-      Ogre::MeshManager::getSingleton().remove(pMesh->getHandle());
+      Ogre::v1::MeshManager::getSingleton().remove(pMesh->getHandle());
       pMesh.setNull();
       m_Mesh = 0;
       return false;
@@ -540,7 +540,7 @@ namespace EasyOgreExporter
         lodConfig.levels.clear();
         lodConfig.mesh = pMesh;
         lodConfig.strategy = 0;
-        if (m_params.getOgreVersion() == Ogre::MESH_VERSION_LATEST)
+        if (m_params.getOgreVersion() == Ogre::v1::MESH_VERSION_LATEST)
           lodConfig.strategy = Ogre::ScreenRatioPixelCountLodStrategy::getSingletonPtr();
         else
           lodConfig.strategy = Ogre::DistanceLodSphereStrategy::getSingletonPtr();
@@ -558,7 +558,7 @@ namespace EasyOgreExporter
 
         for (int nLevel = 0; nLevel < nbLevels; nLevel++)
         {
-          if (m_params.getOgreVersion() == Ogre::MESH_VERSION_LATEST)
+          if (m_params.getOgreVersion() == Ogre::v1::MESH_VERSION_LATEST)
           {
             Ogre::LodLevel lodLevel;
             lodLevel.reductionMethod = Ogre::LodLevel::VRM_PROPORTIONAL;
@@ -661,61 +661,61 @@ namespace EasyOgreExporter
 
     // reorganize mesh buffers
     // Shared geometry
-    if (m_Mesh->sharedVertexData)
+    if (m_Mesh->sharedVertexData[Ogre::VpNormal])
     {
       EasyOgreExporterLog("Info: Optimize mesh\n");
 
-      Ogre::VertexData* vdata = m_Mesh->getVertexDataByTrackHandle(0);
-      Ogre::VertexDeclaration* newadcl = vdata->vertexDeclaration->getAutoOrganisedDeclaration(m_Mesh->hasSkeleton(), m_Mesh->hasVertexAnimation(), m_Mesh->getSharedVertexDataAnimationIncludesNormals());
+      Ogre::v1::VertexData* vdata = m_Mesh->getVertexDataByTrackHandle(0);
+      Ogre::v1::VertexDeclaration* newadcl = vdata->vertexDeclaration->getAutoOrganisedDeclaration(m_Mesh->hasSkeleton(), m_Mesh->hasVertexAnimation(), m_Mesh->getSharedVertexDataAnimationIncludesNormals());
       vdata->reorganiseBuffers(newadcl);
 
       // Automatic
-      Ogre::VertexDeclaration* newDcl = m_Mesh->sharedVertexData->vertexDeclaration->getAutoOrganisedDeclaration(
+      Ogre::v1::VertexDeclaration* newDcl = m_Mesh->sharedVertexData[Ogre::VpNormal]->vertexDeclaration->getAutoOrganisedDeclaration(
       m_Mesh->hasSkeleton(), m_Mesh->hasVertexAnimation(), m_Mesh->getSharedVertexDataAnimationIncludesNormals());
 
-      if (*newDcl != *(m_Mesh->sharedVertexData->vertexDeclaration))
+      if (*newDcl != *(m_Mesh->sharedVertexData[Ogre::VpNormal]->vertexDeclaration))
       {
         // Usages don't matter here since we're onlly exporting
-        Ogre::BufferUsageList bufferUsages;
+        Ogre::v1::BufferUsageList bufferUsages;
         for (size_t u = 0; u <= newDcl->getMaxSource(); ++u)
-          bufferUsages.push_back(Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+          bufferUsages.push_back(Ogre::v1::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
 
-        m_Mesh->sharedVertexData->reorganiseBuffers(newDcl, bufferUsages);
+        m_Mesh->sharedVertexData[Ogre::VpNormal]->reorganiseBuffers(newDcl, bufferUsages);
       }
     }
 
     // Dedicated geometry
-    Ogre::Mesh::SubMeshIterator smIt = m_Mesh->getSubMeshIterator();
+    Ogre::v1::Mesh::SubMeshIterator smIt = m_Mesh->getSubMeshIterator();
     int subIdx = 0;
     while (smIt.hasMoreElements())
     {
-      Ogre::SubMesh* sm = smIt.getNext();
+      Ogre::v1::SubMesh* sm = smIt.getNext();
       if (!sm->useSharedVertices)
       {
-        const bool hasVertexAnim = sm->getVertexAnimationType() != Ogre::VAT_NONE;
+        const bool hasVertexAnim = sm->getVertexAnimationType() != Ogre::v1::VAT_NONE;
 
-        Ogre::VertexData* vdata = m_Mesh->getVertexDataByTrackHandle(subIdx + 1);
-        Ogre::VertexDeclaration* newadcl = vdata->vertexDeclaration->getAutoOrganisedDeclaration(m_Mesh->hasSkeleton(), hasVertexAnim, sm->getVertexAnimationIncludesNormals());
+        Ogre::v1::VertexData* vdata = m_Mesh->getVertexDataByTrackHandle(subIdx + 1);
+        Ogre::v1::VertexDeclaration* newadcl = vdata->vertexDeclaration->getAutoOrganisedDeclaration(m_Mesh->hasSkeleton(), hasVertexAnim, sm->getVertexAnimationIncludesNormals());
         vdata->reorganiseBuffers(newadcl);
 
         // Automatic
-        Ogre::VertexDeclaration* newDcl = sm->vertexData->vertexDeclaration->getAutoOrganisedDeclaration(
+        Ogre::v1::VertexDeclaration* newDcl = sm->vertexData[Ogre::VpNormal]->vertexDeclaration->getAutoOrganisedDeclaration(
                 m_Mesh->hasSkeleton(), hasVertexAnim, sm->getVertexAnimationIncludesNormals());
-        if (*newDcl != *(sm->vertexData->vertexDeclaration))
+        if (*newDcl != *(sm->vertexData[Ogre::VpNormal]->vertexDeclaration))
         {
           // Usages don't matter here since we're onlly exporting
-          Ogre::BufferUsageList bufferUsages;
+          Ogre::v1::BufferUsageList bufferUsages;
           for (size_t u = 0; u <= newDcl->getMaxSource(); ++u)
-            bufferUsages.push_back(Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+            bufferUsages.push_back(Ogre::v1::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
 
-          sm->vertexData->reorganiseBuffers(newDcl, bufferUsages);
+          sm->vertexData[Ogre::VpNormal]->reorganiseBuffers(newDcl, bufferUsages);
         }
       }
       subIdx++;
     }
 
     // Export the binary mesh
-    Ogre::MeshSerializer serializer;
+    Ogre::v1::MeshSerializer serializer;
     std::string meshfile = makeOutputPath(m_params.outputDir, m_params.meshOutputDir, optimizeFileName(m_name), "mesh");
 
     EasyOgreExporterLog("Info: Write mesh file : %s\n", meshfile.c_str());
@@ -730,7 +730,7 @@ namespace EasyOgreExporter
       return false;
     }
 
-    Ogre::MeshManager::getSingleton().remove(pMesh->getHandle());
+    Ogre::v1::MeshManager::getSingleton().remove(pMesh->getHandle());
     pMesh.setNull();
     m_Mesh = 0;
     return true;
@@ -800,7 +800,7 @@ namespace EasyOgreExporter
         return false;
 
       // Create a new animation for each clip
-      Ogre::Animation* pAnimation = 0;
+      Ogre::v1::Animation* pAnimation = 0;
       try
       {
         pAnimation = m_Mesh->createAnimation(name.c_str(), ogreLenght);
@@ -814,7 +814,7 @@ namespace EasyOgreExporter
       if(m_params.useSharedGeom)
       {
         // Create a new track
-        Ogre::VertexAnimationTrack* pTrack = pAnimation->createVertexTrack(0, m_Mesh->sharedVertexData, Ogre::VAT_MORPH);
+        Ogre::v1::VertexAnimationTrack* pTrack = pAnimation->createVertexTrack(0, m_Mesh->sharedVertexData[Ogre::VpNormal], Ogre::v1::VAT_MORPH);
       
         for (int i = 0; i < animKeys.size(); i++)
         {
@@ -829,14 +829,14 @@ namespace EasyOgreExporter
           if(mesh)
           {
             //add key frame
-            Ogre::VertexMorphKeyFrame* pKeyframe = pTrack->createVertexMorphKeyFrame(ogreTime);
+            Ogre::v1::VertexMorphKeyFrame* pKeyframe = pTrack->createVertexMorphKeyFrame(ogreTime);
 
             // Create vertex buffer for current keyframe
-            Ogre::HardwareVertexBufferSharedPtr pBuffer = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
-                                                            Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3),
+            Ogre::v1::HardwareVertexBufferSharedPtr pBuffer = Ogre::v1::HardwareBufferManager::getSingleton().createVertexBuffer(
+                                                            Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT3),
                                                             m_vertices.size(),
-                                                            Ogre::HardwareBuffer::HBU_STATIC, true);
-            float* pFloat = static_cast<float*>(pBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD));
+                                                            Ogre::v1::HardwareBuffer::HBU_STATIC, true);
+            float* pFloat = static_cast<float*>(pBuffer->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));
             
             // Fill the vertex buffer with vertex positions
             for(int v = 0; v < m_vertices.size(); v++)
@@ -882,7 +882,7 @@ namespace EasyOgreExporter
         {
           std::vector<ExVertex> lvert = m_subList[sub].m_vertices;
           // Create a new track
-          Ogre::VertexAnimationTrack* pTrack = pAnimation->createVertexTrack(sub+1, m_Mesh->getSubMesh(sub)->vertexData, Ogre::VAT_MORPH);
+          Ogre::v1::VertexAnimationTrack* pTrack = pAnimation->createVertexTrack(sub+1, m_Mesh->getSubMesh(sub)->vertexData[Ogre::VpNormal], Ogre::v1::VAT_MORPH);
 
           for (int i = 0; i < animKeys.size(); i++)
           {
@@ -897,14 +897,14 @@ namespace EasyOgreExporter
             if(mesh)
             {
               //add key frame
-              Ogre::VertexMorphKeyFrame* pKeyframe = pTrack->createVertexMorphKeyFrame(ogreTime);
+              Ogre::v1::VertexMorphKeyFrame* pKeyframe = pTrack->createVertexMorphKeyFrame(ogreTime);
 
               // Create vertex buffer for current keyframe
-              Ogre::HardwareVertexBufferSharedPtr pBuffer = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
-                                                              Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3),
+              Ogre::v1::HardwareVertexBufferSharedPtr pBuffer = Ogre::v1::HardwareBufferManager::getSingleton().createVertexBuffer(
+                                                              Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT3),
                                                               lvert.size(),
-                                                              Ogre::HardwareBuffer::HBU_STATIC, true);
-              float* pFloat = static_cast<float*>(pBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD));
+                                                              Ogre::v1::HardwareBuffer::HBU_STATIC, true);
+              float* pFloat = static_cast<float*>(pBuffer->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));
               
               // Fill the vertex buffer with vertex positions
               for(int v = 0; v < lvert.size(); v++)
@@ -1179,7 +1179,7 @@ namespace EasyOgreExporter
         return false;
 
       // Create a new animation for each clip
-      Ogre::Animation* pAnimation = 0;
+      Ogre::v1::Animation* pAnimation = 0;
       
       try
       {
@@ -1194,7 +1194,7 @@ namespace EasyOgreExporter
       if(m_params.useSharedGeom)
       {
         // Create a new track
-        Ogre::VertexAnimationTrack* pTrack = pAnimation->createVertexTrack(0, m_Mesh->sharedVertexData, Ogre::VAT_POSE);
+        Ogre::v1::VertexAnimationTrack* pTrack = pAnimation->createVertexTrack(0, m_Mesh->sharedVertexData[Ogre::VpNormal], Ogre::v1::VAT_POSE);
       
         for (int i = 0; i < animKeys.size(); i++)
         {
@@ -1202,7 +1202,7 @@ namespace EasyOgreExporter
           float ogreTime = static_cast<float>((kTime - animRange.Start()) / static_cast<float>(animRate)) / GetFrameRate();
           
           //add key frame
-          Ogre::VertexPoseKeyFrame* pKeyframe = pTrack->createVertexPoseKeyFrame(ogreTime);
+          Ogre::v1::VertexPoseKeyFrame* pKeyframe = pTrack->createVertexPoseKeyFrame(ogreTime);
 
           for(int pose = 0; pose < validChan.size(); pose++)
           {
@@ -1224,7 +1224,7 @@ namespace EasyOgreExporter
         for(int sub = 0; sub < m_subList.size(); sub++)
         {
           // Create a new track
-          Ogre::VertexAnimationTrack* pTrack = pAnimation->createVertexTrack(sub+1, m_Mesh->getSubMesh(sub)->vertexData, Ogre::VAT_POSE);
+          Ogre::v1::VertexAnimationTrack* pTrack = pAnimation->createVertexTrack(sub+1, m_Mesh->getSubMesh(sub)->vertexData[Ogre::VpNormal], Ogre::v1::VAT_POSE);
           
           for (int i = 0; i < animKeys.size(); i++)
           {
@@ -1232,7 +1232,7 @@ namespace EasyOgreExporter
             float ogreTime = static_cast<float>((kTime - animRange.Start()) / static_cast<float>(animRate)) / GetFrameRate();
             
             //add key frame
-            Ogre::VertexPoseKeyFrame* pKeyframe = pTrack->createVertexPoseKeyFrame(ogreTime);
+            Ogre::v1::VertexPoseKeyFrame* pKeyframe = pTrack->createVertexPoseKeyFrame(ogreTime);
 
             for(int pose = 0; pose < validChan.size(); pose++)
             {
@@ -1340,7 +1340,7 @@ namespace EasyOgreExporter
         if(m_params.useSharedGeom)
         {
           // Create a new pose for the ogre mesh
-          Ogre::Pose* pPose = m_Mesh->createPose(0, posename.c_str());
+          Ogre::v1::Pose* pPose = m_Mesh->createPose(0, posename.c_str());
           // Set the pose attributes
           for (int k = 0; k < m_vertices.size(); k++)
           {
@@ -1375,7 +1375,7 @@ namespace EasyOgreExporter
             poseIndexList[sub].push_back(poseIndex);
 
             // Create a new pose for the ogre submesh
-            Ogre::Pose* pPose = m_Mesh->createPose(sub + 1, posename.c_str());
+            Ogre::v1::Pose* pPose = m_Mesh->createPose(sub + 1, posename.c_str());
             // Set the pose attributes
             for (int k = 0; k < verticesList.size(); k++)
             {
@@ -1535,16 +1535,16 @@ namespace EasyOgreExporter
       return false;
     }
 
-    m_Mesh->sharedVertexData = new Ogre::VertexData();
-    m_Mesh->sharedVertexData->vertexCount = m_vertices.size();
+    m_Mesh->sharedVertexData[Ogre::VpNormal] = new Ogre::v1::VertexData();
+    m_Mesh->sharedVertexData[Ogre::VpNormal]->vertexCount = m_vertices.size();
 
-    buildOgreGeometry(m_Mesh->sharedVertexData, m_vertices);
+    buildOgreGeometry(m_Mesh->sharedVertexData[Ogre::VpNormal], m_vertices);
 
     // Write vertex bone assignements list
     if (getSkeleton())
     {
       // Create a new vertex bone assignements list
-      Ogre::Mesh::VertexBoneAssignmentList vbas;
+      Ogre::v1::Mesh::VertexBoneAssignmentList vbas;
       // Scan list of shared geometry vertices
       for (int i = 0; i < m_vertices.size(); i++)
       {
@@ -1552,19 +1552,19 @@ namespace EasyOgreExporter
         // Add all bone assignements for every vertex to the bone assignements list
         for (int j = 0; j < vertex.lWeight.size(); j++)
         {
-          Ogre::VertexBoneAssignment vba;
+          Ogre::v1::VertexBoneAssignment vba;
           vba.vertexIndex = i;
           vba.boneIndex = vertex.lBoneIndex[j];
           vba.weight = vertex.lWeight[j];
           if (vba.weight > 0.0f)
-            vbas.insert(Ogre::Mesh::VertexBoneAssignmentList::value_type(i, vba));
+            vbas.insert(Ogre::v1::Mesh::VertexBoneAssignmentList::value_type(i, vba));
         }
       }
       // Rationalise the bone assignements list
-      m_Mesh->_rationaliseBoneAssignments(m_Mesh->sharedVertexData->vertexCount, vbas);
+      m_Mesh->_rationaliseBoneAssignments(m_Mesh->sharedVertexData[Ogre::VpNormal]->vertexCount, vbas);
 
       // Add bone assignements to the mesh
-      for (Ogre::Mesh::VertexBoneAssignmentList::iterator bi = vbas.begin(); bi != vbas.end(); bi++)
+      for (Ogre::v1::Mesh::VertexBoneAssignmentList::iterator bi = vbas.begin(); bi != vbas.end(); bi++)
         m_Mesh->addBoneAssignment(bi->second);
 
       m_Mesh->_compileBoneAssignments();
@@ -1574,36 +1574,38 @@ namespace EasyOgreExporter
     return true;
   }
 
-  Ogre::SubMesh* ExMesh::createOgreSubmesh(ExSubMesh submesh)
+  Ogre::v1::SubMesh* ExMesh::createOgreSubmesh(ExSubMesh submesh)
   {
     int numVertices = submesh.m_vertices.size();
 
     // Create a new submesh
-    Ogre::SubMesh* pSubmesh = m_Mesh->createSubMesh();
-    pSubmesh->operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
+    Ogre::v1::SubMesh* pSubmesh = m_Mesh->createSubMesh();
+    pSubmesh->operationType = Ogre::OperationType::OT_TRIANGLE_LIST;
 
     // Set material
     if(submesh.m_mat)
       pSubmesh->setMaterialName(submesh.m_mat->getName().c_str());
     
     // Set use shared geometry flag
-    pSubmesh->useSharedVertices = (m_Mesh->sharedVertexData) ? true : false;
+    pSubmesh->useSharedVertices = (m_Mesh->sharedVertexData[Ogre::VpNormal]) ? true : false;
         
-    pSubmesh->vertexData = new Ogre::VertexData();
-    pSubmesh->vertexData->vertexCount = numVertices;
+    pSubmesh->vertexData[Ogre::VpNormal] = pSubmesh->vertexData[Ogre::VpShadow] = new Ogre::v1::VertexData();
+    pSubmesh->vertexData[Ogre::VpNormal]->vertexCount = numVertices;
 
-    bool bUse32BitIndexes = ((numVertices > 65535) || (m_Mesh->sharedVertexData)) ? true : false;
+    pSubmesh->indexData[Ogre::VpShadow] = pSubmesh->indexData[Ogre::VpNormal];
+
+    bool bUse32BitIndexes = ((numVertices > 65535) || (m_Mesh->sharedVertexData[Ogre::VpNormal])) ? true : false;
     
      // Create a new index buffer
-    pSubmesh->indexData->indexCount = numVertices;
-    pSubmesh->indexData->indexBuffer = Ogre::HardwareBufferManager::getSingleton().createIndexBuffer(
-                                               bUse32BitIndexes ? Ogre::HardwareIndexBuffer::IT_32BIT : Ogre::HardwareIndexBuffer::IT_16BIT,
-                                               pSubmesh->indexData->indexCount,
-                                               Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+    pSubmesh->indexData[Ogre::VpNormal]->indexCount = numVertices;
+    pSubmesh->indexData[Ogre::VpNormal]->indexBuffer = Ogre::v1::HardwareBufferManager::getSingleton().createIndexBuffer(
+                                               bUse32BitIndexes ? Ogre::v1::HardwareIndexBuffer::IT_32BIT : Ogre::v1::HardwareIndexBuffer::IT_16BIT,
+                                               pSubmesh->indexData[Ogre::VpNormal]->indexCount,
+                                               Ogre::v1::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
      
     std::vector<std::vector<int>> facesIndex;
     facesIndex.resize(submesh.m_faces.size());
-    if (!m_Mesh->sharedVertexData)
+    if (!m_Mesh->sharedVertexData[Ogre::VpNormal])
     {
       // rebuild vertices index, it must start on 0
       for (int i = 0; i < submesh.m_faces.size(); i++)
@@ -1630,38 +1632,38 @@ namespace EasyOgreExporter
     // Fill the index buffer with faces data
     if (bUse32BitIndexes)
     {
-          Ogre::uint32* pIdx = static_cast<Ogre::uint32*>(pSubmesh->indexData->indexBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD));
+          Ogre::uint32* pIdx = static_cast<Ogre::uint32*>(pSubmesh->indexData[Ogre::VpNormal]->indexBuffer->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));
           for (int i = 0; i < facesIndex.size(); i++)
           {
               *pIdx++ = static_cast<Ogre::uint32>(facesIndex[i][0]);
               *pIdx++ = static_cast<Ogre::uint32>(facesIndex[i][1]);
               *pIdx++ = static_cast<Ogre::uint32>(facesIndex[i][2]);
           }
-          pSubmesh->indexData->indexBuffer->unlock();
+          pSubmesh->indexData[Ogre::VpNormal]->indexBuffer->unlock();
     }
     else
     {
-      Ogre::uint16* pIdx = static_cast<Ogre::uint16*>(pSubmesh->indexData->indexBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD));
+      Ogre::uint16* pIdx = static_cast<Ogre::uint16*>(pSubmesh->indexData[Ogre::VpNormal]->indexBuffer->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));
       for (int i = 0; i < facesIndex.size(); i++)
         {
               *pIdx++ = static_cast<Ogre::uint16>(facesIndex[i][0]);
               *pIdx++ = static_cast<Ogre::uint16>(facesIndex[i][1]);
               *pIdx++ = static_cast<Ogre::uint16>(facesIndex[i][2]);
           }
-          pSubmesh->indexData->indexBuffer->unlock();
+          pSubmesh->indexData[Ogre::VpNormal]->indexBuffer->unlock();
       }
     facesIndex.clear();
 
-    if(!m_Mesh->sharedVertexData)
+    if(!m_Mesh->sharedVertexData[Ogre::VpNormal])
     {
       //build geometry
-      buildOgreGeometry(pSubmesh->vertexData, submesh.m_vertices);
+      buildOgreGeometry(pSubmesh->vertexData[Ogre::VpNormal], submesh.m_vertices);
 
       // Write vertex bone assignements list
             if (getSkeleton())
             {
                 // Create a new vertex bone assignements list
-                Ogre::SubMesh::VertexBoneAssignmentList vbas;
+                Ogre::v1::SubMesh::VertexBoneAssignmentList vbas;
 
                 // Scan list of geometry vertices
         for (int i = 0; i < submesh.m_vertices.size(); i++)
@@ -1670,19 +1672,19 @@ namespace EasyOgreExporter
           // Add all bone assignements for every vertex to the bone assignements list
           for (int j = 0; j < vertex.lWeight.size(); j++)
           {
-            Ogre::VertexBoneAssignment vba;
+            Ogre::v1::VertexBoneAssignment vba;
             vba.vertexIndex = i;
             vba.boneIndex = vertex.lBoneIndex[j];
             vba.weight = vertex.lWeight[j];
             if (vba.weight > 0.0f)
-              vbas.insert(Ogre::SubMesh::VertexBoneAssignmentList::value_type(i, vba));
+              vbas.insert(Ogre::v1::SubMesh::VertexBoneAssignmentList::value_type(i, vba));
           }
         }
 
                 // Rationalise the bone assignements list
-                pSubmesh->parent->_rationaliseBoneAssignments(pSubmesh->vertexData->vertexCount, vbas);
+                pSubmesh->parent->_rationaliseBoneAssignments(pSubmesh->vertexData[Ogre::VpNormal]->vertexCount, vbas);
                 // Add bone assignements to the submesh
-                for (Ogre::SubMesh::VertexBoneAssignmentList::iterator bi = vbas.begin(); bi != vbas.end(); bi++)
+                for (Ogre::v1::SubMesh::VertexBoneAssignmentList::iterator bi = vbas.begin(); bi != vbas.end(); bi++)
                 {
                     pSubmesh->addBoneAssignment(bi->second);
                 }
@@ -1692,13 +1694,13 @@ namespace EasyOgreExporter
         return pSubmesh;
     }
 
-  void ExMesh::buildOgreGeometry(Ogre::VertexData* vdata, std::vector<ExVertex> verticesList)
+  void ExMesh::buildOgreGeometry(Ogre::v1::VertexData* vdata, std::vector<ExVertex> verticesList)
   {
     // A VertexDeclaration declares the format of a set of vertex inputs,
-    Ogre::VertexDeclaration* decl = vdata->vertexDeclaration;
+    Ogre::v1::VertexDeclaration* decl = vdata->vertexDeclaration;
     // A VertexBufferBinding records the state of all the vertex buffer bindings required to
     // provide a vertex declaration with the input data it needs for the vertex elements.
-    Ogre::VertexBufferBinding* bind = vdata->vertexBufferBinding;
+    Ogre::v1::VertexBufferBinding* bind = vdata->vertexBufferBinding;
 
     size_t vBufSegmentSize = 0;
     size_t texSegmentSize = 0;
@@ -1706,20 +1708,20 @@ namespace EasyOgreExporter
     // Create the vertex declaration (the format of vertices).
     // Add vertex position
     decl->addElement(0, vBufSegmentSize,Ogre::VET_FLOAT3,Ogre::VES_POSITION);
-    vBufSegmentSize += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
+    vBufSegmentSize += Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
 
     // Add vertex normal
     if (m_params.exportVertNorm)
     {
       decl->addElement(0, vBufSegmentSize, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
-      vBufSegmentSize += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
+      vBufSegmentSize += Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
     }
 
     // Add vertex colour
     if (m_params.exportVertCol && haveVertexColor)
     {
       decl->addElement(0, vBufSegmentSize, Ogre::VET_COLOUR, Ogre::VES_DIFFUSE);
-      vBufSegmentSize += Ogre::VertexElement::getTypeSize(Ogre::VET_COLOUR);
+      vBufSegmentSize += Ogre::v1::VertexElement::getTypeSize(Ogre::VET_COLOUR);
     }
 
     // Add texture coordinates
@@ -1728,29 +1730,29 @@ namespace EasyOgreExporter
     for (size_t i = 0; i < m_numTextureChannel; i++)
     {
       decl->addElement(1, texSegmentSize, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES, countTex);
-      texSegmentSize += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2);
+      texSegmentSize += Ogre::v1::VertexElement::getTypeSize(Ogre::VET_FLOAT2);
       countTex++;
     }
 
     // Now create the vertex buffers.
-    Ogre::HardwareVertexBufferSharedPtr vbuf = Ogre::HardwareBufferManager::getSingletonPtr()
-      ->createVertexBuffer(vBufSegmentSize, vdata->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
-    Ogre::HardwareVertexBufferSharedPtr texBuf = Ogre::HardwareBufferManager::getSingletonPtr()
-      ->createVertexBuffer(texSegmentSize, vdata->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
+    Ogre::v1::HardwareVertexBufferSharedPtr vbuf = Ogre::v1::HardwareBufferManager::getSingletonPtr()
+      ->createVertexBuffer(vBufSegmentSize, vdata->vertexCount, Ogre::v1::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
+    Ogre::v1::HardwareVertexBufferSharedPtr texBuf = Ogre::v1::HardwareBufferManager::getSingletonPtr()
+      ->createVertexBuffer(texSegmentSize, vdata->vertexCount, Ogre::v1::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
     
     // Bind them.
     bind->setBinding(0, vbuf);
     bind->setBinding(1, texBuf);
 
     // Lock them. pVert & pTexVert are pointers to the start of the hardware buffers.
-    unsigned char* pVert = static_cast<unsigned char*>(vbuf->lock(Ogre::HardwareBuffer::HBL_DISCARD));
-    unsigned char* pTexVert = static_cast<unsigned char*>(texBuf->lock(Ogre::HardwareBuffer::HBL_DISCARD));
+    unsigned char* pVert = static_cast<unsigned char*>(vbuf->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));
+    unsigned char* pTexVert = static_cast<unsigned char*>(texBuf->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD));
     Ogre::ARGB* pCol;
     float* pFloat;
 
     // Get the element lists for the buffers.
-    Ogre::VertexDeclaration::VertexElementList elems = decl->findElementsBySource(0);
-    Ogre::VertexDeclaration::VertexElementList texElems = decl->findElementsBySource(1);
+    Ogre::v1::VertexDeclaration::VertexElementList elems = decl->findElementsBySource(0);
+    Ogre::v1::VertexDeclaration::VertexElementList texElems = decl->findElementsBySource(1);
 
     // Buffers are set up, so iterate the vertices.
     int iTexCoord = 0;
@@ -1758,12 +1760,12 @@ namespace EasyOgreExporter
     {
       ExVertex vertex = verticesList[i];
 
-      Ogre::VertexDeclaration::VertexElementList::const_iterator elemItr, elemEnd;
+      Ogre::v1::VertexDeclaration::VertexElementList::const_iterator elemItr, elemEnd;
       elemEnd = elems.end();
       for (elemItr = elems.begin(); elemItr != elemEnd; ++elemItr)
       {
          // VertexElement corresponds to a part of a vertex definition eg. position, normal
-         const Ogre::VertexElement& elem = *elemItr;
+         const Ogre::v1::VertexElement& elem = *elemItr;
          switch (elem.getSemantic())
          {
          case Ogre::VES_POSITION:
@@ -1788,7 +1790,7 @@ namespace EasyOgreExporter
             {
               elem.baseVertexPointerToElement(pVert, &pCol);
               Ogre::ColourValue cv(vertex.vColor.x, vertex.vColor.y, vertex.vColor.z, vertex.vColor.w);
-                            *pCol = Ogre::VertexElement::convertColourValue(cv, Ogre::VertexElement::getBestColourVertexElementType());
+                            *pCol = Ogre::v1::VertexElement::convertColourValue(cv, Ogre::v1::VertexElement::getBestColourVertexElementType());
               //EasyOgreExporterLog("Info: vertex %d color : %f %f %f %f\n", i, vertex.vColor.x, vertex.vColor.y, vertex.vColor.z, vertex.vColor.w);
             }
             break;
@@ -1802,7 +1804,7 @@ namespace EasyOgreExporter
       for (elemItr = texElems.begin(); elemItr != elemEnd; ++elemItr)
       {
         // VertexElement corresponds to a part of a vertex definition eg. tex coord
-        const Ogre::VertexElement& elem = *elemItr;
+        const Ogre::v1::VertexElement& elem = *elemItr;
         switch (elem.getSemantic())
         {
         case Ogre::VES_TEXTURE_COORDINATES:

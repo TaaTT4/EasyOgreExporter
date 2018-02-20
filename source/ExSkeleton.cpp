@@ -761,7 +761,7 @@ namespace EasyOgreExporter
 	bool ExSkeleton::writeOgreBinary()
 	{
 		// Construct skeleton
-		Ogre::SkeletonPtr pSkeleton = Ogre::OldSkeletonManager::getSingleton().create(m_name.c_str(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+		Ogre::v1::SkeletonPtr pSkeleton = Ogre::v1::OldSkeletonManager::getSingleton().create(m_name.c_str(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 		
     // Create skeleton bones
 		if (!createOgreBones(pSkeleton))
@@ -790,7 +790,7 @@ namespace EasyOgreExporter
 		}
 
 		// Export skeleton binary
-		Ogre::SkeletonSerializer serializer;
+		Ogre::v1::SkeletonSerializer serializer;
 
     std::string filePath = makeOutputPath(m_params.outputDir, m_params.meshOutputDir, m_name, "skeleton");
 		serializer.exportSkeleton(pSkeleton.getPointer(), filePath.c_str(), m_params.getSkeletonVersion());
@@ -801,7 +801,7 @@ namespace EasyOgreExporter
 	}
 
 	// Write joints to an Ogre skeleton
-	bool ExSkeleton::createOgreBones(Ogre::SkeletonPtr pSkeleton)
+	bool ExSkeleton::createOgreBones(Ogre::v1::SkeletonPtr pSkeleton)
 	{
 		// Doug Perkowski
 		// 5/25/2010
@@ -823,7 +823,7 @@ namespace EasyOgreExporter
        //m_converter->addExportedRootBone(j);
 
 			  // Create a new bone
-			  Ogre::OldBone* pBone = pSkeleton->createBone(m_joints[i].name.c_str(), m_joints[i].id);
+			  Ogre::v1::OldBone* pBone = pSkeleton->createBone(m_joints[i].name.c_str(), m_joints[i].id);
 
 			  // Set bone position (relative to it's parent)
         pBone->setPosition(j.trans.x, j.trans.y, j.trans.z);
@@ -844,8 +844,8 @@ namespace EasyOgreExporter
 			if (parentIdx >= 0)
 			{
 				// Get current joint from skeleton
-        Ogre::OldBone* pParent = 0;
-        Ogre::OldBone* pBone = 0;
+        Ogre::v1::OldBone* pParent = 0;
+        Ogre::v1::OldBone* pBone = 0;
         try
         {
           pParent = pSkeleton->getBone(m_joints[parentIdx].id);
@@ -865,14 +865,14 @@ namespace EasyOgreExporter
 	}
 
 	// Write skeleton animations to an Ogre skeleton
-	bool ExSkeleton::createOgreSkeletonAnimations(Ogre::SkeletonPtr pSkeleton)
+	bool ExSkeleton::createOgreSkeletonAnimations(Ogre::v1::SkeletonPtr pSkeleton)
 	{
 		// Read loaded skeleton animations
     // parse the list reversed for good anims order
 		for (size_t i = 0; i < m_animations.size(); i++)
 		{
 			// Create a new animation
-			Ogre::Animation* pAnimation = pSkeleton->createAnimation(m_animations[i].m_name.c_str(), m_animations[i].m_length);
+			Ogre::v1::Animation* pAnimation = pSkeleton->createAnimation(m_animations[i].m_name.c_str(), m_animations[i].m_length);
 
       // Create tracks for current animation
 			for (size_t j = 0; j < m_animations[i].m_tracks.size(); j++)
@@ -880,11 +880,11 @@ namespace EasyOgreExporter
 				ExTrack* t = &m_animations[i].m_tracks[j];
 				
         // Create a new track
-        Ogre::OldBone* oBone = pSkeleton->getBone(t->m_bone.c_str());
+        Ogre::v1::OldBone* oBone = pSkeleton->getBone(t->m_bone.c_str());
         if (!oBone)
           continue;
 
-				Ogre::OldNodeAnimationTrack* pTrack = pAnimation->createOldNodeTrack(j,	oBone);
+				Ogre::v1::OldNodeAnimationTrack* pTrack = pAnimation->createOldNodeTrack(j,	oBone);
 
 				// Create keyframes for current track
 				for (size_t k = 0; k < t->m_skeletonKeyframes.size(); k++)
@@ -892,7 +892,7 @@ namespace EasyOgreExporter
 					skeletonKeyframe* keyframe = &t->m_skeletonKeyframes[k];
 
 					// Create a new keyframe
-					Ogre::TransformKeyFrame* pKeyframe = pTrack->createNodeKeyFrame(keyframe->time);
+					Ogre::v1::TransformKeyFrame* pKeyframe = pTrack->createNodeKeyFrame(keyframe->time);
 
 					// Set translation
 					pKeyframe->setTranslate(Ogre::Vector3(keyframe->trans.x, keyframe->trans.y ,keyframe->trans.z));
