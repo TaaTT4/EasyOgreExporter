@@ -1031,10 +1031,10 @@ bool OgreExporter::exportScene()
   Ogre::LogManager logMgr;
   Ogre::LogManager::getSingleton().createLog("Ogre.log", true);
   Ogre::ResourceGroupManager rgm;
-  Ogre::MeshManager meshMgr;
-  Ogre::OldSkeletonManager skelMgr;
+  Ogre::v1::MeshManager meshMgr;
+  Ogre::v1::OldSkeletonManager skelMgr;
   Ogre::MaterialManager matMgr;
-  Ogre::DefaultHardwareBufferManager hardwareBufMgr;
+  Ogre::v1::DefaultHardwareBufferManager hardwareBufMgr;
   Ogre::LodStrategyManager lodstrategymanager;  
 
   m_params.currentRootJoints.clear();

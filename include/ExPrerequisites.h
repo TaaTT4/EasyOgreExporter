@@ -59,6 +59,7 @@
 // OGRE API
 // Max defines PI and OgreMath.h fails to compile as a result.
 #undef PI 
+#undef NUM_LIGHT_TYPES
 // Max defines base_type and boost(which ogre uses) fails to compile as a result.
 #undef base_type
 #include "Ogre.h"

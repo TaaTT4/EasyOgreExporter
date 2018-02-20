@@ -208,57 +208,57 @@ namespace EasyOgreExporter
       }
     }
 
-    Ogre::MeshVersion getOgreVersion()
+    Ogre::v1::MeshVersion getOgreVersion()
     {
       switch(meshVersion)
       {
         case TOGRE_LASTEST:
-          return Ogre::MESH_VERSION_LATEST;
+          return Ogre::v1::MESH_VERSION_LATEST;
 
         case TOGRE_1_10:
-          return Ogre::MESH_VERSION_1_10;
+          return Ogre::v1::MESH_VERSION_1_10;
 
 		    case TOGRE_1_8:
-          return Ogre::MESH_VERSION_1_8;
+          return Ogre::v1::MESH_VERSION_1_8;
 
         case TOGRE_1_7:
-          return Ogre::MESH_VERSION_1_7;
+          return Ogre::v1::MESH_VERSION_1_7;
 
         case TOGRE_1_4:
-          return Ogre::MESH_VERSION_1_4;
+          return Ogre::v1::MESH_VERSION_1_4;
 
         case TOGRE_1_0:
-          return Ogre::MESH_VERSION_1_0;
+          return Ogre::v1::MESH_VERSION_1_0;
 
         default:
-          return Ogre::MESH_VERSION_LATEST;
+          return Ogre::v1::MESH_VERSION_LATEST;
       }
     }
 
-    Ogre::SkeletonVersion getSkeletonVersion()
+    Ogre::v1::SkeletonVersion getSkeletonVersion()
     {
       switch(meshVersion)
       {
         case TOGRE_LASTEST:
-          return Ogre::SKELETON_VERSION_LATEST;
+          return Ogre::v1::SKELETON_VERSION_LATEST;
 
         case TOGRE_1_10:
-          return Ogre::SKELETON_VERSION_1_8;
+          return Ogre::v1::SKELETON_VERSION_1_8;
 
 		    case TOGRE_1_8:
-          return Ogre::SKELETON_VERSION_1_8;
+          return Ogre::v1::SKELETON_VERSION_1_8;
 
         case TOGRE_1_7:
-          return Ogre::SKELETON_VERSION_1_0;
+          return Ogre::v1::SKELETON_VERSION_1_0;
 
         case TOGRE_1_4:
-          return Ogre::SKELETON_VERSION_1_0;
+          return Ogre::v1::SKELETON_VERSION_1_0;
 
         case TOGRE_1_0:
-          return Ogre::SKELETON_VERSION_1_0;
+          return Ogre::v1::SKELETON_VERSION_1_0;
 
         default:
-          return Ogre::SKELETON_VERSION_LATEST;
+          return Ogre::v1::SKELETON_VERSION_LATEST;
       }
     }
 
