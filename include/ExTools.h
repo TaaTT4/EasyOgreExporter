@@ -114,12 +114,7 @@ inline std::string ToLowerCase(std::string str)
 // Helper function to replace special chars for file names
 inline std::string optimizeFileName(const std::string& filename)
 {
-  std::string newFilename = filename;
-  if (isdigit(newFilename.c_str()[0]))
-    newFilename.insert(0, "_");
-
-  std::replace_if(newFilename.begin(), newFilename.end(), invalidChar, '_');
-	return newFilename;
+	return filename.substr(0, filename.find('$'));
 }
 
 // Helper function to replace special chars for resources

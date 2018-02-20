@@ -792,7 +792,7 @@ namespace EasyOgreExporter
 		// Export skeleton binary
 		Ogre::v1::SkeletonSerializer serializer;
 
-    std::string filePath = makeOutputPath(m_params.outputDir, m_params.meshOutputDir, m_name, "skeleton");
+    std::string filePath = makeOutputPath(m_params.outputDir, m_params.meshOutputDir, optimizeFileName(m_name), "skeleton");
 		serializer.exportSkeleton(pSkeleton.getPointer(), filePath.c_str(), m_params.getSkeletonVersion());
 		pSkeleton.setNull();
 

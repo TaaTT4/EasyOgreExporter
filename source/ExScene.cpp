@@ -261,11 +261,11 @@ namespace EasyOgreExporter
 		std::wstring name_w = pGameNode->GetName();
 		std::string name_s = mParams.resPrefix;
 		name_s.append(name_w.begin(),name_w.end());
-		pNodeElement->SetAttribute("name", optimizeResourceName(name_s).c_str());
+		pNodeElement->SetAttribute("name", name_s.c_str());
 #else
 		std::string name = mParams.resPrefix;
 		name.append(pGameNode->GetName());
-		pNodeElement->SetAttribute("name", optimizeResourceName(name).c_str());
+		pNodeElement->SetAttribute("name", name.c_str());
 #endif
 		pNodeElement->SetAttribute("id", id_counter);
 		pNodeElement->SetAttribute("isTarget", "false");
@@ -438,7 +438,7 @@ namespace EasyOgreExporter
     if(pRenderDistance)
       pRenderDistance->GetPropertyValue(renderDistance);
 
-    std::string entityName = optimizeResourceName(parent->Attribute("name"));
+    std::string entityName = parent->Attribute("name");
 
     TiXmlElement* pEntityElement = new TiXmlElement("entity");
     pEntityElement->SetAttribute("name", entityName.c_str());
@@ -446,9 +446,8 @@ namespace EasyOgreExporter
 
     std::string instName = mParams.resPrefix;
     instName.append(getFirstInstanceName(pGameNode));
-    instName = optimizeResourceName(instName);
     
-    std::string meshPath = optimizeFileName(instName + ".mesh");
+    std::string meshPath = optimizeFileName(instName) + ".mesh";
 
     pEntityElement->SetAttribute("meshFile", meshPath.c_str());
     pEntityElement->SetAttribute("castShadows", getBoolString(pGameMesh->CastShadows()).c_str());

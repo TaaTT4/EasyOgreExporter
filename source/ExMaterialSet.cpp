@@ -186,21 +186,6 @@ namespace EasyOgreExporter
 		}
 		if (!found)
     {
-      //be aware of duplicated materials names
-      std::string name = pMat->getName();
-      int index = 1;
-      while(getMaterialByName(name))
-      {
-        std::stringstream strIdx;
-        strIdx << index;
-        name = pMat->getName() + "_" + strIdx.str();
-        
-        index++;
-      }
-      
-      if (index > 1)
-        pMat->getName() = name;
-
 			m_materials.push_back(pMat);
     }
 	};

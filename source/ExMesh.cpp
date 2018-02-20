@@ -637,7 +637,7 @@ namespace EasyOgreExporter
     if (m_pSkeleton && m_params.exportSkeleton)
     {
       EasyOgreExporterLog("Info: Link Ogre skeleton\n");
-      std::string filePath = optimizeFileName(m_name + ".skeleton");
+      std::string filePath = optimizeFileName(m_name) + ".skeleton";
         //makeOutputPath("", params.meshOutputDir, m_name, "skeleton";
       try
       {
@@ -1584,7 +1584,7 @@ namespace EasyOgreExporter
 
     // Set material
     if(submesh.m_mat)
-      pSubmesh->setMaterialName(submesh.m_mat->getName().c_str());
+      pSubmesh->setMaterialName(optimizeFileName(submesh.m_mat->getName()).c_str());
     
     // Set use shared geometry flag
     pSubmesh->useSharedVertices = (m_Mesh->sharedVertexData[Ogre::VpNormal]) ? true : false;

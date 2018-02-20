@@ -60,7 +60,6 @@ namespace EasyOgreExporter
 #else
     meshName.append(pGameNode->GetName());
 #endif
-    meshName = optimizeResourceName(meshName);
     ExMesh* mesh = new ExMesh(this, pGameNode, pGameMesh, meshName);
     
     lmat = mesh->getMaterials();
