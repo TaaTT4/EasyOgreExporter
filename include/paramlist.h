@@ -125,7 +125,7 @@ namespace EasyOgreExporter
 			exportScene = true;
       enableLogs = true;
 
-      meshVersion = TOGRE_LASTEST;
+      meshVersion = TOGRE_1_10;
 		}
 
 		ParamList& operator=(ParamList& source)	
