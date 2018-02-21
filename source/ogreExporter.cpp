@@ -558,7 +558,7 @@ int	OgreSceneExporter::DoExport(const TCHAR* name, ExpInterface* pExpInterface, 
 #else
   std::string scenePath = name;
 #endif
-  for (int i=0; i<scenePath.length(); ++i)
+  for (int i=scenePath.length()-5; i<scenePath.length(); ++i)
   {
     scenePath[i]=tolower(scenePath[i]);
   }
