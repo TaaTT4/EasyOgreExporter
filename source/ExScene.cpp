@@ -720,6 +720,17 @@ namespace EasyOgreExporter
 			pLightElement->LinkEndChild(pAttenuationElement);
 		}
 
+    IGameNode* pLightTarget = pGameLight->GetLightTarget();
+    if (pLightTarget)
+    {
+        TiXmlElement* pTargetElement = new TiXmlElement("trackTarget");
+        pTargetElement->SetAttribute("nodeName", ToUtf8(pLightTarget->GetName()).c_str());
+
+        parent->LinkEndChild(pTargetElement);
+
+        writeNodeData(parent->Parent()->ToElement(), pLightTarget, IGameObject::IGAME_UNKNOWN);
+    }
+
     id_counter++;
 		return pLightElement;
   }
