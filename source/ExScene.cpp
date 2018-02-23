@@ -618,14 +618,24 @@ namespace EasyOgreExporter
         return 0;
     }
 
+    float power = 1.0f;
+
+    IGameProperty* pGameProperty = pGameLight->GetLightColor();
+    if (pGameProperty)
+    {
+      pGameProperty->GetPropertyValue(power);
+    }
+
     TiXmlElement* pLightElement = new TiXmlElement("light");
 		pLightElement->SetAttribute("name", parent->Attribute("name"));
 		pLightElement->SetAttribute("id", id_counter);
+		pLightElement->SetAttribute("visible", getBoolString(pGameLight->IsLightOn()).c_str());
 		pLightElement->SetAttribute("type", getLightTypeString(lightType).c_str());
 		pLightElement->SetAttribute("castShadows", getBoolString(pGameLight->CastShadows()).c_str());
+		pLightElement->SetDoubleAttribute("power", power);
 		parent->LinkEndChild(pLightElement);
 
-    IGameProperty* pGameProperty = pGameLight->GetLightColor();
+    pGameProperty = pGameLight->GetLightColor();
     float propertyValue;
     Point3 lightColor;
     if(pGameProperty)
@@ -679,7 +689,7 @@ namespace EasyOgreExporter
 			pAttenuationElement->SetDoubleAttribute("range", attRange);
 			pAttenuationElement->SetDoubleAttribute("constant", attConst);
 			pAttenuationElement->SetDoubleAttribute("linear", attLinear);
-			pAttenuationElement->SetDoubleAttribute("quadratic", attQuad);
+			pAttenuationElement->SetDoubleAttribute("quadric", attQuad);
 			pLightElement->LinkEndChild(pAttenuationElement);
 		}
 
