@@ -23,6 +23,7 @@
 #include "IMixer8.h"
 #include "iInstanceMgr.h"
 #include "MeshNormalSpec.h"
+#include <codecvt>
 #include <iostream>
 
 #ifdef PRE_MAX_2010
@@ -109,6 +110,11 @@ inline std::string ToLowerCase(std::string str)
     cstr[i] = tolower(cstr[i]);
   }
   return str = cstr;
+}
+
+inline std::string ToUtf8(std::wstring str)
+{
+  return std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(str);
 }
 
 // Helper function to replace special chars for file names

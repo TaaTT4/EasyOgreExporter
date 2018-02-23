@@ -551,6 +551,17 @@ namespace EasyOgreExporter
 		pClippingElement->SetDoubleAttribute("far", farClip);
 		pCameraElement->LinkEndChild(pClippingElement);
 
+    IGameNode* pCameraTarget = pGameCamera->GetCameraTarget();
+    if (pCameraTarget)
+    {
+        TiXmlElement* pTargetElement = new TiXmlElement("trackTarget");
+        pTargetElement->SetAttribute("nodeName", ToUtf8(pCameraTarget->GetName()).c_str());
+
+        parent->LinkEndChild(pTargetElement);
+
+        writeNodeData(parent->Parent()->ToElement(), pCameraTarget, IGameObject::IGAME_UNKNOWN);
+    }
+
     id_counter++;
 		return pCameraElement;
   }
