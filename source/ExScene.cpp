@@ -524,6 +524,8 @@ namespace EasyOgreExporter
     if(pGameProperty)
     {
       pGameProperty->GetPropertyValue(camFov);
+
+      camFov = 2.0f * atan(tan(camFov / 2.0f) / GetCOREInterface()->GetRendImageAspect());
     }
     pCameraElement->SetDoubleAttribute("fov", camFov);
     parent->LinkEndChild(pCameraElement);
