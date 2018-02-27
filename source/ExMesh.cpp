@@ -314,7 +314,19 @@ namespace EasyOgreExporter
       IGameMaterial* mat = GetSubMaterialByID(nodeMtl, matIds[matid]);
 
       ExMaterial* pMaterial = loadMaterial(mat);
-      ExSubMesh submesh(matid, pMaterial);
+      ExSubMesh* submesh;
+
+      std::vector<ExSubMesh>::iterator itr = find_if(m_subList.begin(), m_subList.end(), [&](const ExSubMesh& a) { return a.m_mat->m_GameMaterial == mat; });
+      if (itr == m_subList.end())
+      {
+        m_subList.push_back(ExSubMesh(matid, pMaterial));
+
+        submesh = &m_subList.back();
+      }
+      else
+      {
+        submesh = itr._Ptr;
+      }
 
       //construct a list of faces with the correct indices
       for (int fi = 0; fi < faces.size(); fi++)
@@ -332,13 +344,12 @@ namespace EasyOgreExporter
           ExVertex vertex(m_vertices[face.vertices[j]]);
           ExVertex svertex(vertex);
           
-          submesh.m_vertices.push_back(svertex);
-          sface.vertices[j] = submesh.m_vertices.size() -1;
+          submesh->m_vertices.push_back(svertex);
+          sface.vertices[j] = submesh->m_vertices.size() -1;
         }
 
-        submesh.m_faces.push_back(sface);
+        submesh->m_faces.push_back(sface);
       }
-      m_subList.push_back(submesh);
     }
   }
 
