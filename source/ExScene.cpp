@@ -431,6 +431,11 @@ namespace EasyOgreExporter
       return 0;
     }*/
 
+    if (!pGameNode->GetMaxNode()->Renderable())
+    {
+        parent->SetAttribute("visibility", "hidden");
+    }
+
     //object user params
     float renderDistance = 0.0f;
     IPropertyContainer* pc = pGameMesh->GetIPropertyContainer();
