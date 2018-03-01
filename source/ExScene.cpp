@@ -101,7 +101,7 @@ namespace EasyOgreExporter
 		return("point");
 	}
 
-  bool ExScene::exportNodeAnimation(TiXmlElement* pAnimsElement, IGameNode* pGameNode, Interval animRange, std::string name, bool resample, IGameObject::ObjectTypes type)
+  bool ExScene::exportNodeAnimation(TiXmlElement* pAnimsElement, IGameNode* pGameNode, Interval animRange, std::string name, bool resample, IGameObject::ObjectTypes type, int index)
   {
     ParamList mParams = m_converter->getParams();
     std::vector<int> animKeys = GetAnimationsKeysTime(pGameNode, animRange, resample, mParams.resampleStep);
@@ -131,13 +131,38 @@ namespace EasyOgreExporter
       if(!isAnimated)
         return false;
 
+      int autoplay = 1;
+      int enable = 1;
+      int loop = 1;
+
+      IPropertyContainer* pc = pGameNode->GetIGameObject()->GetIPropertyContainer();
+
+      IGameProperty* pGameProperty = pc->QueryProperty(ToUtf16("#ANIMATION_" + std::to_string(index + 1) + "_AUTOPLAY").c_str());
+      if (pGameProperty)
+      {
+        pGameProperty->GetPropertyValue(autoplay);
+      }
+
+      pGameProperty = pc->QueryProperty(ToUtf16("#ANIMATION_" + std::to_string(index + 1) + "_ENABLE").c_str());
+      if (pGameProperty)
+      {
+        pGameProperty->GetPropertyValue(enable);
+      }
+
+      pGameProperty = pc->QueryProperty(ToUtf16("#ANIMATION_" + std::to_string(index + 1) + "_LOOP").c_str());
+      if (pGameProperty)
+      {
+        pGameProperty->GetPropertyValue(loop);
+      }
+
       TimeValue length = animRange.End() - animRange.Start();
       float ogreAnimLength = (static_cast<float>(length) / static_cast<float>(GetTicksPerFrame())) / GetFrameRate();
 
       TiXmlElement* pAnimElement = new TiXmlElement("animation");
       pAnimElement->SetAttribute("name", name.c_str());
-      pAnimElement->SetAttribute("enable", "false");
-      pAnimElement->SetAttribute("loop", "false");
+      pAnimElement->SetAttribute("autoplay", getBoolString(autoplay != 0).c_str());
+      pAnimElement->SetAttribute("enable", getBoolString(enable != 0).c_str());
+      pAnimElement->SetAttribute("loop", getBoolString(loop != 0).c_str());
       pAnimElement->SetAttribute("interpolationMode", "linear");
       pAnimElement->SetAttribute("rotationInterpolationMode", "linear");
       pAnimElement->SetDoubleAttribute("length", ogreAnimLength);
@@ -352,7 +377,7 @@ namespace EasyOgreExporter
                 animRange.SetEnd(stop);
                 EasyOgreExporterLog("Info : mixer clip found %s from %i to %i\n", clipName.c_str(), start, stop);
                 
-                if(exportNodeAnimation(pAnimsElement, pGameNode, animRange, clipName, mParams.resampleAnims, type))
+                if(exportNodeAnimation(pAnimsElement, pGameNode, animRange, clipName, mParams.resampleAnims, type, 0))
                   useDefault = false;
                 
                 clipId++;
@@ -371,7 +396,27 @@ namespace EasyOgreExporter
 
         if(!cnt)
         {
-          exportNodeAnimation(pAnimsElement, pGameNode, animRange, "default", mParams.resampleAnims, type);
+          IPropertyContainer* pc = pGameNode->GetIGameObject()->GetIPropertyContainer();
+
+          for (int i = 0; i < ANIMATIONS_COUNT; i++)
+          {
+            IGameProperty* pGameProperty = pc->QueryProperty(std::wstring(L"#ANIMATION_" + std::to_wstring(i + 1)).c_str());
+            if (pGameProperty)
+            {
+              const MCHAR* animation;
+              pGameProperty->GetPropertyValue(animation);
+
+              Ogre::StringVector params = Ogre::StringUtil::split(ToUtf8(animation), ";");
+
+              if (params.size() != 3)
+                continue;
+
+              std::string name = params[0];
+              Interval interval(Ogre::StringConverter::parseInt(params[1]) * GetTicksPerFrame(), Ogre::StringConverter::parseInt(params[2]) * GetTicksPerFrame());
+
+              exportNodeAnimation(pAnimsElement, pGameNode, interval, name, mParams.resampleAnims, type, i);
+            }
+          }
         }
         else
         {
@@ -399,9 +444,9 @@ namespace EasyOgreExporter
 			std::wstring name_w = frameTagMgr->GetNameByID(t);
 			std::string name_s;
 			name_s.assign(name_w.begin(), name_w.end());
-            exportNodeAnimation(pAnimsElement, pGameNode, ianim, std::string(name_s), mParams.resampleAnims, type);
+            exportNodeAnimation(pAnimsElement, pGameNode, ianim, std::string(name_s), mParams.resampleAnims, type, 0);
 #else
-            exportNodeAnimation(pAnimsElement, pGameNode, ianim, std::string(frameTagMgr->GetNameByID(t)), mParams.resampleAnims, type);
+            exportNodeAnimation(pAnimsElement, pGameNode, ianim, std::string(frameTagMgr->GetNameByID(t)), mParams.resampleAnims, type, 0);
 #endif
           }
         }

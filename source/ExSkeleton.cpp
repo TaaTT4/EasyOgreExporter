@@ -553,7 +553,27 @@ namespace EasyOgreExporter
 
       if(!cnt)
       {
-        loadClip("default_skl", animRange.Start(), animRange.End(), GetTicksPerFrame());
+        IPropertyContainer* pc = pGameNode->GetIGameObject()->GetIPropertyContainer();
+
+        for (int i = 0; i < ANIMATIONS_COUNT; i++)
+        {
+          IGameProperty* pGameProperty = pc->QueryProperty(std::wstring(L"#ANIMATION_" + std::to_wstring(i + 1)).c_str());
+          if (pGameProperty)
+          {
+            const MCHAR* animation;
+            pGameProperty->GetPropertyValue(animation);
+
+            Ogre::StringVector params = Ogre::StringUtil::split(ToUtf8(animation), ";");
+
+            if (params.size() != 3)
+              continue;
+
+            std::string name = params[0];
+            Interval interval(Ogre::StringConverter::parseInt(params[1]), Ogre::StringConverter::parseInt(params[2]));
+
+            loadClip(name, interval.Start() * GetTicksPerFrame(), interval.End() * GetTicksPerFrame(), GetTicksPerFrame());
+          }
+        }
       }
       else
       {

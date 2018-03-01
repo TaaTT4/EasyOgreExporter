@@ -117,6 +117,11 @@ inline std::string ToUtf8(std::wstring str)
   return std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(str);
 }
 
+inline std::wstring ToUtf16(std::string str)
+{
+  return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>().from_bytes(str);
+}
+
 // Helper function to replace special chars for file names
 inline std::string optimizeFileName(const std::string& filename)
 {

@@ -94,7 +94,7 @@ namespace EasyOgreExporter
 
 		  std::string getLightTypeString(ExOgreLightType type);
       std::string getBoolString(bool value);
-      bool exportNodeAnimation(TiXmlElement* pAnimsElement, IGameNode* pGameNode, Interval animRange, std::string name, bool resample, IGameObject::ObjectTypes type);
+      bool exportNodeAnimation(TiXmlElement* pAnimsElement, IGameNode* pGameNode, Interval animRange, std::string name, bool resample, IGameObject::ObjectTypes type, int index);
 	};
 
 }; // end of namespace

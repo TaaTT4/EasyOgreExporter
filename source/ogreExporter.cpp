@@ -993,6 +993,89 @@ void OgreExporter::initIGameConf(std::string path)
 
   igameUserData->LinkEndChild(userData);
 
+  for (int i = 0; i < ANIMATIONS_COUNT; ++i)
+  {
+    TiXmlElement* animationId = new TiXmlElement("id");
+    animationId->LinkEndChild(new TiXmlText(std::to_string(200 + i * 4).c_str()));
+
+    TiXmlElement* animationName = new TiXmlElement("simplename");
+    animationName->LinkEndChild(new TiXmlText(std::string("#ANIMATION_" + std::to_string(i + 1) + " (format: NAME;FRAME_BEGIN;FRAME_END)").c_str()));
+
+    TiXmlElement* animationKey = new TiXmlElement("keyName");
+    animationKey->LinkEndChild(new TiXmlText(std::string("#ANIMATION_" + std::to_string(i + 1)).c_str()));
+
+    TiXmlElement* animationType = new TiXmlElement("type");
+    animationType->LinkEndChild(new TiXmlText("string"));
+
+    TiXmlElement* animation = new TiXmlElement("UserProperty");
+    animation->LinkEndChild(animationId);
+    animation->LinkEndChild(animationName);
+    animation->LinkEndChild(animationKey);
+    animation->LinkEndChild(animationType);
+
+    igameUserData->LinkEndChild(animation);
+
+    TiXmlElement* animationAutoplayId = new TiXmlElement("id");
+    animationAutoplayId->LinkEndChild(new TiXmlText(std::to_string(201 + i * 4).c_str()));
+
+    TiXmlElement* animationAutoplayName = new TiXmlElement("simplename");
+    animationAutoplayName->LinkEndChild(new TiXmlText(std::string("#ANIMATION_" + std::to_string(i + 1) + "_AUTOPLAY (default: 1)").c_str()));
+
+    TiXmlElement* animationAutoplayKey = new TiXmlElement("keyName");
+    animationAutoplayKey->LinkEndChild(new TiXmlText(std::string("#ANIMATION_" + std::to_string(i + 1) + "_AUTOPLAY").c_str()));
+
+    TiXmlElement* animationAutoplayType = new TiXmlElement("type");
+    animationAutoplayType->LinkEndChild(new TiXmlText("int"));
+
+    TiXmlElement* animationAutoplay = new TiXmlElement("UserProperty");
+    animationAutoplay->LinkEndChild(animationAutoplayId);
+    animationAutoplay->LinkEndChild(animationAutoplayName);
+    animationAutoplay->LinkEndChild(animationAutoplayKey);
+    animationAutoplay->LinkEndChild(animationAutoplayType);
+
+    igameUserData->LinkEndChild(animationAutoplay);
+
+    TiXmlElement* animationEnableId = new TiXmlElement("id");
+    animationEnableId->LinkEndChild(new TiXmlText(std::to_string(202 + i * 4).c_str()));
+
+    TiXmlElement* animationEnableName = new TiXmlElement("simplename");
+    animationEnableName->LinkEndChild(new TiXmlText(std::string("#ANIMATION_" + std::to_string(i + 1) + "_ENABLE (default: 1)").c_str()));
+
+    TiXmlElement* animationEnableKey = new TiXmlElement("keyName");
+    animationEnableKey->LinkEndChild(new TiXmlText(std::string("#ANIMATION_" + std::to_string(i + 1) + "_ENABLE").c_str()));
+
+    TiXmlElement* animationEnableType = new TiXmlElement("type");
+    animationEnableType->LinkEndChild(new TiXmlText("int"));
+
+    TiXmlElement* animationEnable = new TiXmlElement("UserProperty");
+    animationEnable->LinkEndChild(animationEnableId);
+    animationEnable->LinkEndChild(animationEnableName);
+    animationEnable->LinkEndChild(animationEnableKey);
+    animationEnable->LinkEndChild(animationEnableType);
+
+    igameUserData->LinkEndChild(animationEnable);
+
+    TiXmlElement* animationLoopId = new TiXmlElement("id");
+    animationLoopId->LinkEndChild(new TiXmlText(std::to_string(203 + i * 4).c_str()));
+
+    TiXmlElement* animationLoopName = new TiXmlElement("simplename");
+    animationLoopName->LinkEndChild(new TiXmlText(std::string("#ANIMATION_" + std::to_string(i + 1) + "_LOOP (default: 1)").c_str()));
+
+    TiXmlElement* animationLoopKey = new TiXmlElement("keyName");
+    animationLoopKey->LinkEndChild(new TiXmlText(std::string("#ANIMATION_" + std::to_string(i + 1) + "_LOOP").c_str()));
+
+    TiXmlElement* animationLoopType = new TiXmlElement("type");
+    animationLoopType->LinkEndChild(new TiXmlText("int"));
+
+    TiXmlElement* animationLoop = new TiXmlElement("UserProperty");
+    animationLoop->LinkEndChild(animationLoopId);
+    animationLoop->LinkEndChild(animationLoopName);
+    animationLoop->LinkEndChild(animationLoopKey);
+    animationLoop->LinkEndChild(animationLoopType);
+
+    igameUserData->LinkEndChild(animationLoop);
+  }
+
   xmlDoc.SaveFile(path.c_str());
 }
 
