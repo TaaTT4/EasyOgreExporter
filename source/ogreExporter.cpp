@@ -1096,6 +1096,46 @@ void OgreExporter::initIGameConf(std::string path)
 
   igameUserData->LinkEndChild(entityInstance);
 
+  TiXmlElement* entityRenderQueueId = new TiXmlElement("id");
+  entityRenderQueueId->LinkEndChild(new TiXmlText("301"));
+
+  TiXmlElement* entityRenderQueueName = new TiXmlElement("simplename");
+  entityRenderQueueName->LinkEndChild(new TiXmlText("#ENTITY_RENDERQUEUE (default: 0)"));
+
+  TiXmlElement* entityRenderQueueKey = new TiXmlElement("keyName");
+  entityRenderQueueKey->LinkEndChild(new TiXmlText("#ENTITY_RENDERQUEUE"));
+
+  TiXmlElement* entityRenderQueueType = new TiXmlElement("type");
+  entityRenderQueueType->LinkEndChild(new TiXmlText("int"));
+
+  TiXmlElement* entityRenderQueue = new TiXmlElement("UserProperty");
+  entityRenderQueue->LinkEndChild(entityRenderQueueId);
+  entityRenderQueue->LinkEndChild(entityRenderQueueName);
+  entityRenderQueue->LinkEndChild(entityRenderQueueKey);
+  entityRenderQueue->LinkEndChild(entityRenderQueueType);
+
+  igameUserData->LinkEndChild(entityRenderQueue);
+
+  TiXmlElement* entityVisibilityMaskId = new TiXmlElement("id");
+  entityVisibilityMaskId->LinkEndChild(new TiXmlText("302"));
+
+  TiXmlElement* entityVisibilityMaskName = new TiXmlElement("simplename");
+  entityVisibilityMaskName->LinkEndChild(new TiXmlText("#ENTITY_VISIBILITYMASK (default: 0x7)"));
+
+  TiXmlElement* entityVisibilityMaskKey = new TiXmlElement("keyName");
+  entityVisibilityMaskKey->LinkEndChild(new TiXmlText("#ENTITY_VISIBILITYMASK"));
+
+  TiXmlElement* entityVisibilityMaskType = new TiXmlElement("type");
+  entityVisibilityMaskType->LinkEndChild(new TiXmlText("string"));
+
+  TiXmlElement* entityVisibilityMask = new TiXmlElement("UserProperty");
+  entityVisibilityMask->LinkEndChild(entityVisibilityMaskId);
+  entityVisibilityMask->LinkEndChild(entityVisibilityMaskName);
+  entityVisibilityMask->LinkEndChild(entityVisibilityMaskKey);
+  entityVisibilityMask->LinkEndChild(entityVisibilityMaskType);
+
+  igameUserData->LinkEndChild(entityVisibilityMask);
+
   xmlDoc.SaveFile(path.c_str());
 }
 

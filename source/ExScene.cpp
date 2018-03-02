@@ -494,6 +494,24 @@ namespace EasyOgreExporter
     pEntityElement->SetAttribute("name", entityName.c_str());
     pEntityElement->SetAttribute("id", id_counter);
 
+    IGameProperty* pGameProperty = pc->QueryProperty(_T("#ENTITY_RENDERQUEUE"));
+    if (pGameProperty)
+    {
+      int renderQueue;
+      pGameProperty->GetPropertyValue(renderQueue);
+
+      pEntityElement->SetAttribute("renderQueue", renderQueue);
+    }
+
+    pGameProperty = pc->QueryProperty(_T("#ENTITY_VISIBILITYMASK"));
+    if (pGameProperty)
+    {
+      const MCHAR* visibilityMask;
+      pGameProperty->GetPropertyValue(visibilityMask);
+
+      pEntityElement->SetAttribute("visibilityMask", ToUtf8(visibilityMask).c_str());
+    }
+
     INode* inst = getFirstInstance(pGameNode);
     std::string instName = mParams.resPrefix;
     
