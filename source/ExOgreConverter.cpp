@@ -61,10 +61,11 @@ namespace EasyOgreExporter
     meshName.append(pGameNode->GetName());
 #endif
     ExMesh* mesh = new ExMesh(this, pGameNode, pGameMesh, meshName);
+    bool meshIsInst = getFirstInstance(pGameNode)->UserPropExists(_T("#ENTITY_INSTANCE")) || !isFirstInstance(pGameNode);
     
     lmat = mesh->getMaterials();
 
-    if (!isFirstInstance(pGameNode))
+    if (meshIsInst)
     {
       EasyOgreExporterLog("Info: Ignore instanciated mesh\n");
       ret = true;
@@ -88,7 +89,7 @@ namespace EasyOgreExporter
     }
 
     // Write skeleton binary
-    if (mParams.exportSkeleton && mesh->getSkeleton() && isFirstInstance(pGameNode))
+    if (mParams.exportSkeleton && mesh->getSkeleton() && !meshIsInst)
     {
       // Load skeleton animations
       mesh->getSkeleton()->loadAnims(pGameNode);

@@ -1076,6 +1076,26 @@ void OgreExporter::initIGameConf(std::string path)
     igameUserData->LinkEndChild(animationLoop);
   }
 
+  TiXmlElement* entityInstanceId = new TiXmlElement("id");
+  entityInstanceId->LinkEndChild(new TiXmlText("300"));
+
+  TiXmlElement* entityInstanceName = new TiXmlElement("simplename");
+  entityInstanceName->LinkEndChild(new TiXmlText("#ENTITY_INSTANCE (default: empty)"));
+
+  TiXmlElement* entityInstanceKey = new TiXmlElement("keyName");
+  entityInstanceKey->LinkEndChild(new TiXmlText("#ENTITY_INSTANCE"));
+
+  TiXmlElement* entityInstanceType = new TiXmlElement("type");
+  entityInstanceType->LinkEndChild(new TiXmlText("string"));
+
+  TiXmlElement* entityInstance = new TiXmlElement("UserProperty");
+  entityInstance->LinkEndChild(entityInstanceId);
+  entityInstance->LinkEndChild(entityInstanceName);
+  entityInstance->LinkEndChild(entityInstanceKey);
+  entityInstance->LinkEndChild(entityInstanceType);
+
+  igameUserData->LinkEndChild(entityInstance);
+
   xmlDoc.SaveFile(path.c_str());
 }
 

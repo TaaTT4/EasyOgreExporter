@@ -1206,7 +1206,7 @@ inline std::vector<int> GetPointAnimationsKeysTime(IGameNode* pGameNode, Interva
   return animKeys;
 }
 
-inline std::string getFirstInstanceName(IGameNode* pGameNode)
+inline INode* getFirstInstance(IGameNode* pGameNode)
 {
   INodeTab nodeInstances;
   IInstanceMgr* instMgr = IInstanceMgr::GetInstanceMgr();
@@ -1214,12 +1214,17 @@ inline std::string getFirstInstanceName(IGameNode* pGameNode)
   //Get nodes instances
   instMgr->GetInstances(*(pGameNode->GetMaxNode()), nodeInstances);
 
+  return nodeInstances[nodeInstances.Count() - 1];
+}
+
+inline std::string getFirstInstanceName(IGameNode* pGameNode)
+{
   std::string nodeName;
 #ifdef UNICODE
-	std::wstring pNodeName_w = nodeInstances[nodeInstances.Count() - 1]->GetName();
+	std::wstring pNodeName_w = getFirstInstance(pGameNode)->GetName();
 	nodeName.assign(pNodeName_w.begin(), pNodeName_w.end());
 #else
-	nodeName = nodeInstances[nodeInstances.Count() - 1]->GetName();
+	nodeName = getFirstInstance(pGameNode)->GetName();
 #endif
 
   return nodeName;
@@ -1227,13 +1232,7 @@ inline std::string getFirstInstanceName(IGameNode* pGameNode)
 
 inline bool isFirstInstance(IGameNode* pGameNode)
 {
-  INodeTab nodeInstances;
-  IInstanceMgr* instMgr = IInstanceMgr::GetInstanceMgr();
-  
-  //Get nodes instances
-  instMgr->GetInstances(*(pGameNode->GetMaxNode()), nodeInstances);
-
-  if(nodeInstances[nodeInstances.Count() - 1] == pGameNode->GetMaxNode())
+  if(getFirstInstance(pGameNode) == pGameNode->GetMaxNode())
     return true;
   
   return false;
