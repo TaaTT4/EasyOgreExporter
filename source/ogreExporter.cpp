@@ -1156,6 +1156,86 @@ void OgreExporter::initIGameConf(std::string path)
 
   igameUserData->LinkEndChild(entityVisibilityMask);
 
+  TiXmlElement* reflectionId = new TiXmlElement("id");
+  reflectionId->LinkEndChild(new TiXmlText("400"));
+
+  TiXmlElement* reflectionName = new TiXmlElement("simplename");
+  reflectionName->LinkEndChild(new TiXmlText("#REFLECTION (default: 0)"));
+
+  TiXmlElement* reflectionKey = new TiXmlElement("keyName");
+  reflectionKey->LinkEndChild(new TiXmlText("#REFLECTION"));
+
+  TiXmlElement* reflectionType = new TiXmlElement("type");
+  reflectionType->LinkEndChild(new TiXmlText("int"));
+
+  TiXmlElement* reflection = new TiXmlElement("UserProperty");
+  reflection->LinkEndChild(reflectionId);
+  reflection->LinkEndChild(reflectionName);
+  reflection->LinkEndChild(reflectionKey);
+  reflection->LinkEndChild(reflectionType);
+
+  igameUserData->LinkEndChild(reflection);
+
+  TiXmlElement* reflectionClipId = new TiXmlElement("id");
+  reflectionClipId->LinkEndChild(new TiXmlText("401"));
+
+  TiXmlElement* reflectionClipName = new TiXmlElement("simplename");
+  reflectionClipName->LinkEndChild(new TiXmlText("#REFLECTION_CLIP (default: 0.0)"));
+
+  TiXmlElement* reflectionClipKey = new TiXmlElement("keyName");
+  reflectionClipKey->LinkEndChild(new TiXmlText("#REFLECTION_CLIP"));
+
+  TiXmlElement* reflectionClipType = new TiXmlElement("type");
+  reflectionClipType->LinkEndChild(new TiXmlText("float"));
+
+  TiXmlElement* reflectionClip = new TiXmlElement("UserProperty");
+  reflectionClip->LinkEndChild(reflectionClipId);
+  reflectionClip->LinkEndChild(reflectionClipName);
+  reflectionClip->LinkEndChild(reflectionClipKey);
+  reflectionClip->LinkEndChild(reflectionClipType);
+
+  igameUserData->LinkEndChild(reflectionClip);
+
+  TiXmlElement* reflectionVisibilityMaskId = new TiXmlElement("id");
+  reflectionVisibilityMaskId->LinkEndChild(new TiXmlText("402"));
+
+  TiXmlElement* reflectionVisibilityMaskName = new TiXmlElement("simplename");
+  reflectionVisibilityMaskName->LinkEndChild(new TiXmlText("#REFLECTION_VISIBILITYMASK (format: 0xVISIBILITY_MASK)"));
+
+  TiXmlElement* reflectionVisibilityMaskKey = new TiXmlElement("keyName");
+  reflectionVisibilityMaskKey->LinkEndChild(new TiXmlText("#REFLECTION_VISIBILITYMASK"));
+
+  TiXmlElement* reflectionVisibilityMaskType = new TiXmlElement("type");
+  reflectionVisibilityMaskType->LinkEndChild(new TiXmlText("string"));
+
+  TiXmlElement* reflectionVisibilityMask = new TiXmlElement("UserProperty");
+  reflectionVisibilityMask->LinkEndChild(reflectionVisibilityMaskId);
+  reflectionVisibilityMask->LinkEndChild(reflectionVisibilityMaskName);
+  reflectionVisibilityMask->LinkEndChild(reflectionVisibilityMaskKey);
+  reflectionVisibilityMask->LinkEndChild(reflectionVisibilityMaskType);
+
+  igameUserData->LinkEndChild(reflectionVisibilityMask);
+
+  TiXmlElement* reflectionWhitelistId = new TiXmlElement("id");
+  reflectionWhitelistId->LinkEndChild(new TiXmlText("403"));
+
+  TiXmlElement* reflectionWhitelistName = new TiXmlElement("simplename");
+  reflectionWhitelistName->LinkEndChild(new TiXmlText("#REFLECTION_WHITELIST (default: 1)"));
+
+  TiXmlElement* reflectionWhitelistKey = new TiXmlElement("keyName");
+  reflectionWhitelistKey->LinkEndChild(new TiXmlText("#REFLECTION_WHITELIST"));
+
+  TiXmlElement* reflectionWhitelistType = new TiXmlElement("type");
+  reflectionWhitelistType->LinkEndChild(new TiXmlText("int"));
+
+  TiXmlElement* reflectionWhitelist = new TiXmlElement("UserProperty");
+  reflectionWhitelist->LinkEndChild(reflectionWhitelistId);
+  reflectionWhitelist->LinkEndChild(reflectionWhitelistName);
+  reflectionWhitelist->LinkEndChild(reflectionWhitelistKey);
+  reflectionWhitelist->LinkEndChild(reflectionWhitelistType);
+
+  igameUserData->LinkEndChild(reflectionWhitelist);
+
   xmlDoc.SaveFile(path.c_str());
 }
 

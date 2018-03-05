@@ -281,7 +281,17 @@ namespace EasyOgreExporter
     // Notice that in Max we flip the w-component of the quaternion;
     rot.w = -rot.w;
 
-		TiXmlElement* pNodeElement = new TiXmlElement("node");
+    int reflection = 0;
+
+    IPropertyContainer* pc = pGameNode->GetIGameObject()->GetIPropertyContainer();
+
+    IGameProperty* pGameProperty = pc->QueryProperty(_T("#REFLECTION"));
+    if (pGameProperty)
+    {
+      pGameProperty->GetPropertyValue(reflection);
+    }
+
+		TiXmlElement* pNodeElement = new TiXmlElement(reflection ? "reflection" : "node");
 #ifdef UNICODE
 		std::wstring name_w = pGameNode->GetName();
 		std::string name_s = mParams.resPrefix;
@@ -295,6 +305,36 @@ namespace EasyOgreExporter
 		pNodeElement->SetAttribute("id", id_counter);
 		pNodeElement->SetAttribute("isTarget", "false");
 		parent->LinkEndChild(pNodeElement);
+
+    if (reflection)
+    {
+      pGameProperty = pc->QueryProperty(_T("#REFLECTION_CLIP"));
+      if (pGameProperty)
+      {
+        float clip;
+        pGameProperty->GetPropertyValue(clip);
+
+        pNodeElement->SetDoubleAttribute("clip", clip);
+      }
+
+      pGameProperty = pc->QueryProperty(_T("#REFLECTION_VISIBILITYMASK"));
+      if (pGameProperty)
+      {
+        const MCHAR* visibilityMask;
+        pGameProperty->GetPropertyValue(visibilityMask);
+
+        pNodeElement->SetAttribute("visibilityMask", ToUtf8(visibilityMask).c_str());
+      }
+
+      pGameProperty = pc->QueryProperty(_T("#REFLECTION_WHITELIST"));
+      if (pGameProperty)
+      {
+        int whitelist;
+        pGameProperty->GetPropertyValue(whitelist);
+
+        pNodeElement->SetAttribute("whitelist", getBoolString(whitelist).c_str());
+      }
+    }
  
 		TiXmlElement* pPositionElement = new TiXmlElement("position");
     pPositionElement->SetDoubleAttribute("x", trans.x);
