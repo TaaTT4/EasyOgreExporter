@@ -1031,7 +1031,7 @@ bool OgreExporter::exportScene()
   // Ogre::Root ogreRoot;
   // Create singletons
   Ogre::LogManager logMgr;
-  Ogre::LogManager::getSingleton().createLog("Ogre.log", true);
+  Ogre::LogManager::getSingleton().createLog("Ogre.log", true, true, !m_params.enableLogs);
   Ogre::ResourceGroupManager rgm;
   Ogre::v1::MeshManager meshMgr;
   Ogre::v1::OldSkeletonManager skelMgr;

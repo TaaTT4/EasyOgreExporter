@@ -123,7 +123,7 @@ namespace EasyOgreExporter
 			currentRootJoints.clear();
 			yUpAxis = true;
 			exportScene = true;
-      enableLogs = true;
+      enableLogs = false;
 
       meshVersion = TOGRE_1_10;
 		}
