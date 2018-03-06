@@ -84,7 +84,7 @@ namespace EasyOgreExporter
 		ParamList()	{
 			lum = 1.0f;
 			exportMesh = true;
-			exportMaterial = true;
+			exportMaterial = false;
       exportProgram = SHADER_BUMP;
 			exportSkeleton = true;
 			exportSkelAnims = true;

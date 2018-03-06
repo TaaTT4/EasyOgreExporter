@@ -142,6 +142,7 @@ namespace EasyOgreExporter
         CheckDlgButton(hWnd, IDC_CONVDDS, exp->convertToDDS);
         CheckDlgButton(hWnd, IDC_RESAMPLE_ANIMS, exp->resampleAnims);
         CheckDlgButton(hWnd, IDC_LOGS, exp->enableLogs);
+        CheckDlgButton(hWnd, IDC_MATERIALS, exp->exportMaterial);
     		
 #ifdef UNICODE
         //fill Shader mode combo box
@@ -367,6 +368,7 @@ namespace EasyOgreExporter
               exp->convertToDDS = IsDlgButtonChecked(hWnd, IDC_CONVDDS) ? true : false;
               exp->resampleAnims = IsDlgButtonChecked(hWnd, IDC_RESAMPLE_ANIMS) ? true : false;
               exp->enableLogs = IsDlgButtonChecked(hWnd, IDC_LOGS) ? true : false;
+              exp->exportMaterial = IsDlgButtonChecked(hWnd, IDC_MATERIALS) ? true : false;
 
               int shaderIdx = SendDlgItemMessage(hWnd, IDC_SHADERMODE, CB_GETCURSEL, 0, 0);
               if (shaderIdx != CB_ERR)
@@ -721,6 +723,10 @@ void OgreSceneExporter::loadExportConf(std::string path, ParamList &param)
     if (child)
       param.enableLogs = (child->GetText() && (atoi(child->GetText()) == 1)) ? true : false;
 
+    child = rootElem->FirstChildElement("IDC_MATERIALS");
+    if (child)
+      param.exportMaterial = (child->GetText() && (atoi(child->GetText()) == 1)) ? true : false;
+
     child = rootElem->FirstChildElement("IDC_SHADERMODE");
     if(child)
     {
@@ -870,6 +876,11 @@ void OgreExporter::saveExportConf(std::string path)
 
   child = new TiXmlElement("IDC_LOGS");
   childText = new TiXmlText(m_params.enableLogs ? "1" : "0");
+  child->LinkEndChild(childText);
+  contProperties->LinkEndChild(child);
+
+  child = new TiXmlElement("IDC_MATERIALS");
+  childText = new TiXmlText(m_params.exportMaterial ? "1" : "0");
   child->LinkEndChild(childText);
   contProperties->LinkEndChild(child);
 
