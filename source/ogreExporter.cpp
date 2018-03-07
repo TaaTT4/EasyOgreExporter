@@ -585,21 +585,12 @@ int	OgreSceneExporter::DoExport(const TCHAR* name, ExpInterface* pExpInterface, 
   }
   
   std::string outDir = scenePath.substr(0, folderIndex);
-  std::string texOutDir = "bitmap";
-  std::string meshOutDir = "mesh";
-  std::string matOutDir = "material";
-  std::string progOutDir = "program";
   std::string partOutDir = "particle";
   std::string sceneFile = scenePath.substr(folderIndex + 1, (sceneIndex - (folderIndex + 1)));
   std::string resPrefix = sceneFile;
   
   // Setup the paramlist.
   params.outputDir = outDir.c_str();
-  params.texOutputDir = texOutDir.c_str();
-  params.meshOutputDir = meshOutDir.c_str();
-  params.materialOutputDir = matOutDir.c_str();
-  params.programOutputDir = progOutDir.c_str();
-  params.resPrefix = resPrefix.c_str();
   params.sceneFilename = sceneFile.c_str();
   
   int unitType = 0;
