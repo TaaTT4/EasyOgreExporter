@@ -114,8 +114,8 @@ namespace EasyOgreExporter
       sceneFilename = "";
       resPrefix = "";
 		  
-			buildEdges = true;
-			buildTangents = true;
+			buildEdges = false;
+			buildTangents = false;
 			tangentsSplitMirrored = false;
 			tangentsSplitRotated = false;
 			tangentsUseParity = false;
