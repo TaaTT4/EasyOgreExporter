@@ -84,7 +84,7 @@ namespace EasyOgreExporter
 		ParamList()	{
 			lum = 1.0f;
 			exportMesh = true;
-			exportMaterial = true;
+			exportMaterial = false;
       exportProgram = SHADER_BUMP;
 			exportSkeleton = true;
 			exportSkelAnims = true;
@@ -114,8 +114,8 @@ namespace EasyOgreExporter
       sceneFilename = "";
       resPrefix = "";
 		  
-			buildEdges = true;
-			buildTangents = true;
+			buildEdges = false;
+			buildTangents = false;
 			tangentsSplitMirrored = false;
 			tangentsSplitRotated = false;
 			tangentsUseParity = false;
@@ -123,9 +123,9 @@ namespace EasyOgreExporter
 			currentRootJoints.clear();
 			yUpAxis = true;
 			exportScene = true;
-      enableLogs = true;
+      enableLogs = false;
 
-      meshVersion = TOGRE_LASTEST;
+      meshVersion = TOGRE_1_10;
 		}
 
 		ParamList& operator=(ParamList& source)	

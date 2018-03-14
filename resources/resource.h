@@ -25,21 +25,22 @@
 #define IDC_SPLITROT                    1020
 #define IDC_STOREPARITY                 1021
 #define IDC_CHECK1                      1022
-#define IDC_GENLOD                      1022
-#define IDC_PROGDIR                     1023
-#define IDC_CONVDDS                     1024
-#define IDC_SHADERMODE2                 1025
-#define IDC_TEX_SIZE                    1025
-#define IDC_TEXSIZE                     1025
-#define IDC_TEX_SIZE_LABEL              1026
-#define IDC_TEXSIZE_LABEL               1026
-#define IDC_NUMMIPS                     1027
-#define IDC_NUMMIPS_LABEL               1028
-#define IDC_YUPAXIS                     1029
-#define IDC_RESAMPLE_STEP               1030
-#define IDC_RESAMPLE_SPIN               1031
-#define IDC_RESAMPLE_ANIMS2             1032
-#define IDC_LOGS                        1032
+#define IDC_GENLOD                      1023
+#define IDC_PROGDIR                     1024
+#define IDC_CONVDDS                     1025
+#define IDC_SHADERMODE2                 1026
+#define IDC_TEX_SIZE                    1027
+#define IDC_TEXSIZE                     1028
+#define IDC_TEX_SIZE_LABEL              1029
+#define IDC_TEXSIZE_LABEL               1030
+#define IDC_NUMMIPS                     1031
+#define IDC_NUMMIPS_LABEL               1032
+#define IDC_YUPAXIS                     1033
+#define IDC_RESAMPLE_STEP               1034
+#define IDC_RESAMPLE_SPIN               1035
+#define IDC_RESAMPLE_ANIMS2             1036
+#define IDC_LOGS                        1037
+#define IDC_MATERIALS                   1038
 
 // Next default values for new objects
 // 
@@ -47,7 +48,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1031
+#define _APS_NEXT_CONTROL_VALUE         1039
 #define _APS_NEXT_SYMED_VALUE           104
 #endif
 #endif

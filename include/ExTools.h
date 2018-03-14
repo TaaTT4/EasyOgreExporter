@@ -23,6 +23,7 @@
 #include "IMixer8.h"
 #include "iInstanceMgr.h"
 #include "MeshNormalSpec.h"
+#include <codecvt>
 #include <iostream>
 
 #ifdef PRE_MAX_2010
@@ -111,15 +112,20 @@ inline std::string ToLowerCase(std::string str)
   return str = cstr;
 }
 
+inline std::string ToUtf8(std::wstring str)
+{
+  return std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(str);
+}
+
+inline std::wstring ToUtf16(std::string str)
+{
+  return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>().from_bytes(str);
+}
+
 // Helper function to replace special chars for file names
 inline std::string optimizeFileName(const std::string& filename)
 {
-  std::string newFilename = filename;
-  if (isdigit(newFilename.c_str()[0]))
-    newFilename.insert(0, "_");
-
-  std::replace_if(newFilename.begin(), newFilename.end(), invalidChar, '_');
-	return newFilename;
+	return filename.substr(0, filename.find('$'));
 }
 
 // Helper function to replace special chars for resources
@@ -1200,7 +1206,7 @@ inline std::vector<int> GetPointAnimationsKeysTime(IGameNode* pGameNode, Interva
   return animKeys;
 }
 
-inline std::string getFirstInstanceName(IGameNode* pGameNode)
+inline INode* getFirstInstance(IGameNode* pGameNode)
 {
   INodeTab nodeInstances;
   IInstanceMgr* instMgr = IInstanceMgr::GetInstanceMgr();
@@ -1208,12 +1214,17 @@ inline std::string getFirstInstanceName(IGameNode* pGameNode)
   //Get nodes instances
   instMgr->GetInstances(*(pGameNode->GetMaxNode()), nodeInstances);
 
+  return nodeInstances[nodeInstances.Count() - 1];
+}
+
+inline std::string getFirstInstanceName(IGameNode* pGameNode)
+{
   std::string nodeName;
 #ifdef UNICODE
-	std::wstring pNodeName_w = nodeInstances[nodeInstances.Count() - 1]->GetName();
+	std::wstring pNodeName_w = getFirstInstance(pGameNode)->GetName();
 	nodeName.assign(pNodeName_w.begin(), pNodeName_w.end());
 #else
-	nodeName = nodeInstances[nodeInstances.Count() - 1]->GetName();
+	nodeName = getFirstInstance(pGameNode)->GetName();
 #endif
 
   return nodeName;
@@ -1221,13 +1232,7 @@ inline std::string getFirstInstanceName(IGameNode* pGameNode)
 
 inline bool isFirstInstance(IGameNode* pGameNode)
 {
-  INodeTab nodeInstances;
-  IInstanceMgr* instMgr = IInstanceMgr::GetInstanceMgr();
-  
-  //Get nodes instances
-  instMgr->GetInstances(*(pGameNode->GetMaxNode()), nodeInstances);
-
-  if(nodeInstances[nodeInstances.Count() - 1] == pGameNode->GetMaxNode())
+  if(getFirstInstance(pGameNode) == pGameNode->GetMaxNode())
     return true;
   
   return false;

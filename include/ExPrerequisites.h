@@ -23,6 +23,8 @@
 
 #define PRECISION 0.000001
 
+#define ANIMATIONS_COUNT 16
+
 #if _MSC_VER <1600
 #define nullptr 0
 #endif

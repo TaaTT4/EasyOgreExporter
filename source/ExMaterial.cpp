@@ -143,11 +143,9 @@ namespace EasyOgreExporter
 
 	std::string ExMaterial::getMaterialName(std::string prefix)
 	{
-		std::string newMatName = "";
-
 		if(!m_GameMaterial)
 		{
-			newMatName = "defaultLambert";
+			std::string newMatName = "defaultLambert";
 			return newMatName;
 		}
 
@@ -165,8 +163,7 @@ namespace EasyOgreExporter
 		trim(maxmat);
 		tmpStr.append(maxmat);
 
-		newMatName = optimizeResourceName(tmpStr);
-		return newMatName;
+		return tmpStr;
 	}
 
 	std::string ExMaterial::getShaderName(ExShader::ShaderType type, std::string prefix)

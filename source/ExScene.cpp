@@ -101,7 +101,7 @@ namespace EasyOgreExporter
 		return("point");
 	}
 
-  bool ExScene::exportNodeAnimation(TiXmlElement* pAnimsElement, IGameNode* pGameNode, Interval animRange, std::string name, bool resample, IGameObject::ObjectTypes type)
+  bool ExScene::exportNodeAnimation(TiXmlElement* pAnimsElement, IGameNode* pGameNode, Interval animRange, std::string name, bool resample, IGameObject::ObjectTypes type, int index)
   {
     ParamList mParams = m_converter->getParams();
     std::vector<int> animKeys = GetAnimationsKeysTime(pGameNode, animRange, resample, mParams.resampleStep);
@@ -131,13 +131,38 @@ namespace EasyOgreExporter
       if(!isAnimated)
         return false;
 
+      int autoplay = 1;
+      int enable = 1;
+      int loop = 1;
+
+      IPropertyContainer* pc = pGameNode->GetIGameObject()->GetIPropertyContainer();
+
+      IGameProperty* pGameProperty = pc->QueryProperty(ToUtf16("#ANIMATION_" + std::to_string(index + 1) + "_AUTOPLAY").c_str());
+      if (pGameProperty)
+      {
+        pGameProperty->GetPropertyValue(autoplay);
+      }
+
+      pGameProperty = pc->QueryProperty(ToUtf16("#ANIMATION_" + std::to_string(index + 1) + "_ENABLE").c_str());
+      if (pGameProperty)
+      {
+        pGameProperty->GetPropertyValue(enable);
+      }
+
+      pGameProperty = pc->QueryProperty(ToUtf16("#ANIMATION_" + std::to_string(index + 1) + "_LOOP").c_str());
+      if (pGameProperty)
+      {
+        pGameProperty->GetPropertyValue(loop);
+      }
+
       TimeValue length = animRange.End() - animRange.Start();
       float ogreAnimLength = (static_cast<float>(length) / static_cast<float>(GetTicksPerFrame())) / GetFrameRate();
 
       TiXmlElement* pAnimElement = new TiXmlElement("animation");
       pAnimElement->SetAttribute("name", name.c_str());
-      pAnimElement->SetAttribute("enable", "false");
-      pAnimElement->SetAttribute("loop", "false");
+      pAnimElement->SetAttribute("autoplay", getBoolString(autoplay != 0).c_str());
+      pAnimElement->SetAttribute("enable", getBoolString(enable != 0).c_str());
+      pAnimElement->SetAttribute("loop", getBoolString(loop != 0).c_str());
       pAnimElement->SetAttribute("interpolationMode", "linear");
       pAnimElement->SetAttribute("rotationInterpolationMode", "linear");
       pAnimElement->SetDoubleAttribute("length", ogreAnimLength);
@@ -256,20 +281,60 @@ namespace EasyOgreExporter
     // Notice that in Max we flip the w-component of the quaternion;
     rot.w = -rot.w;
 
-		TiXmlElement* pNodeElement = new TiXmlElement("node");
+    int reflection = 0;
+
+    IPropertyContainer* pc = pGameNode->GetIGameObject()->GetIPropertyContainer();
+
+    IGameProperty* pGameProperty = pc->QueryProperty(_T("#REFLECTION"));
+    if (pGameProperty)
+    {
+      pGameProperty->GetPropertyValue(reflection);
+    }
+
+		TiXmlElement* pNodeElement = new TiXmlElement(reflection ? "reflection" : "node");
 #ifdef UNICODE
 		std::wstring name_w = pGameNode->GetName();
 		std::string name_s = mParams.resPrefix;
 		name_s.append(name_w.begin(),name_w.end());
-		pNodeElement->SetAttribute("name", optimizeResourceName(name_s).c_str());
+		pNodeElement->SetAttribute("name", name_s.c_str());
 #else
 		std::string name = mParams.resPrefix;
 		name.append(pGameNode->GetName());
-		pNodeElement->SetAttribute("name", optimizeResourceName(name).c_str());
+		pNodeElement->SetAttribute("name", name.c_str());
 #endif
 		pNodeElement->SetAttribute("id", id_counter);
 		pNodeElement->SetAttribute("isTarget", "false");
 		parent->LinkEndChild(pNodeElement);
+
+    if (reflection)
+    {
+      pGameProperty = pc->QueryProperty(_T("#REFLECTION_CLIP"));
+      if (pGameProperty)
+      {
+        float clip;
+        pGameProperty->GetPropertyValue(clip);
+
+        pNodeElement->SetDoubleAttribute("clip", clip);
+      }
+
+      pGameProperty = pc->QueryProperty(_T("#REFLECTION_VISIBILITYMASK"));
+      if (pGameProperty)
+      {
+        const MCHAR* visibilityMask;
+        pGameProperty->GetPropertyValue(visibilityMask);
+
+        pNodeElement->SetAttribute("visibilityMask", ToUtf8(visibilityMask).c_str());
+      }
+
+      pGameProperty = pc->QueryProperty(_T("#REFLECTION_WHITELIST"));
+      if (pGameProperty)
+      {
+        int whitelist;
+        pGameProperty->GetPropertyValue(whitelist);
+
+        pNodeElement->SetAttribute("whitelist", getBoolString(whitelist).c_str());
+      }
+    }
  
 		TiXmlElement* pPositionElement = new TiXmlElement("position");
     pPositionElement->SetDoubleAttribute("x", trans.x);
@@ -352,7 +417,7 @@ namespace EasyOgreExporter
                 animRange.SetEnd(stop);
                 EasyOgreExporterLog("Info : mixer clip found %s from %i to %i\n", clipName.c_str(), start, stop);
                 
-                if(exportNodeAnimation(pAnimsElement, pGameNode, animRange, clipName, mParams.resampleAnims, type))
+                if(exportNodeAnimation(pAnimsElement, pGameNode, animRange, clipName, mParams.resampleAnims, type, 0))
                   useDefault = false;
                 
                 clipId++;
@@ -371,7 +436,27 @@ namespace EasyOgreExporter
 
         if(!cnt)
         {
-          exportNodeAnimation(pAnimsElement, pGameNode, animRange, "default", mParams.resampleAnims, type);
+          IPropertyContainer* pc = pGameNode->GetIGameObject()->GetIPropertyContainer();
+
+          for (int i = 0; i < ANIMATIONS_COUNT; i++)
+          {
+            IGameProperty* pGameProperty = pc->QueryProperty(std::wstring(L"#ANIMATION_" + std::to_wstring(i + 1)).c_str());
+            if (pGameProperty)
+            {
+              const MCHAR* animation;
+              pGameProperty->GetPropertyValue(animation);
+
+              Ogre::StringVector params = Ogre::StringUtil::split(ToUtf8(animation), ";");
+
+              if (params.size() != 3)
+                continue;
+
+              std::string name = params[0];
+              Interval interval(Ogre::StringConverter::parseInt(params[1]) * GetTicksPerFrame(), Ogre::StringConverter::parseInt(params[2]) * GetTicksPerFrame());
+
+              exportNodeAnimation(pAnimsElement, pGameNode, interval, name, mParams.resampleAnims, type, i);
+            }
+          }
         }
         else
         {
@@ -399,9 +484,9 @@ namespace EasyOgreExporter
 			std::wstring name_w = frameTagMgr->GetNameByID(t);
 			std::string name_s;
 			name_s.assign(name_w.begin(), name_w.end());
-            exportNodeAnimation(pAnimsElement, pGameNode, ianim, std::string(name_s), mParams.resampleAnims, type);
+            exportNodeAnimation(pAnimsElement, pGameNode, ianim, std::string(name_s), mParams.resampleAnims, type, 0);
 #else
-            exportNodeAnimation(pAnimsElement, pGameNode, ianim, std::string(frameTagMgr->GetNameByID(t)), mParams.resampleAnims, type);
+            exportNodeAnimation(pAnimsElement, pGameNode, ianim, std::string(frameTagMgr->GetNameByID(t)), mParams.resampleAnims, type, 0);
 #endif
           }
         }
@@ -431,6 +516,11 @@ namespace EasyOgreExporter
       return 0;
     }*/
 
+    if (!pGameNode->GetMaxNode()->Renderable())
+    {
+        parent->SetAttribute("visibility", "hidden");
+    }
+
     //object user params
     float renderDistance = 0.0f;
     IPropertyContainer* pc = pGameMesh->GetIPropertyContainer();
@@ -438,17 +528,46 @@ namespace EasyOgreExporter
     if(pRenderDistance)
       pRenderDistance->GetPropertyValue(renderDistance);
 
-    std::string entityName = optimizeResourceName(parent->Attribute("name"));
+    std::string entityName = parent->Attribute("name");
 
     TiXmlElement* pEntityElement = new TiXmlElement("entity");
     pEntityElement->SetAttribute("name", entityName.c_str());
     pEntityElement->SetAttribute("id", id_counter);
 
+    IGameProperty* pGameProperty = pc->QueryProperty(_T("#ENTITY_RENDERQUEUE"));
+    if (pGameProperty)
+    {
+      int renderQueue;
+      pGameProperty->GetPropertyValue(renderQueue);
+
+      pEntityElement->SetAttribute("renderQueue", renderQueue);
+    }
+
+    pGameProperty = pc->QueryProperty(_T("#ENTITY_VISIBILITYMASK"));
+    if (pGameProperty)
+    {
+      const MCHAR* visibilityMask;
+      pGameProperty->GetPropertyValue(visibilityMask);
+
+      pEntityElement->SetAttribute("visibilityMask", ToUtf8(visibilityMask).c_str());
+    }
+
+    INode* inst = getFirstInstance(pGameNode);
     std::string instName = mParams.resPrefix;
-    instName.append(getFirstInstanceName(pGameNode));
-    instName = optimizeResourceName(instName);
     
-    std::string meshPath = optimizeFileName(instName + ".mesh");
+    if (inst->UserPropExists(_T("#ENTITY_INSTANCE")))
+    {
+      MSTR instRef;
+      inst->GetUserPropString(_T("#ENTITY_INSTANCE"), instRef);
+
+      instName += ToUtf8(instRef.data());
+    }
+    else
+    {
+      instName.append(getFirstInstanceName(pGameNode));
+    }
+
+    std::string meshPath = optimizeFileName(instName) + ".mesh";
 
     pEntityElement->SetAttribute("meshFile", meshPath.c_str());
     pEntityElement->SetAttribute("castShadows", getBoolString(pGameMesh->CastShadows()).c_str());
@@ -485,6 +604,36 @@ namespace EasyOgreExporter
 
       pUserDataElement->LinkEndChild(pUserDataText);
       pEntityElement->LinkEndChild(pUserDataElement);
+    }
+
+    pGameProperty = pc->QueryProperty(_T("#ENTITY_AABB"));
+    if (pGameProperty)
+    {
+      const MCHAR* aabb;
+      pGameProperty->GetPropertyValue(aabb);
+
+      Ogre::StringVector params = Ogre::StringUtil::split(ToUtf8(aabb), ";");
+      if (params.size() == 2)
+      {
+        Ogre::Vector3 center = Ogre::StringConverter::parseVector3(params[0]);
+        Ogre::Vector3 halfSize = Ogre::StringConverter::parseVector3(params[1]) * 0.5f;
+
+        TiXmlElement* pCenter = new TiXmlElement("center");
+        pCenter->SetDoubleAttribute("x", center.x);
+        pCenter->SetDoubleAttribute("y", center.z);
+        pCenter->SetDoubleAttribute("z", -center.y);
+
+        TiXmlElement* pHalfSize = new TiXmlElement("halfSize");
+        pHalfSize->SetDoubleAttribute("x", halfSize.x);
+        pHalfSize->SetDoubleAttribute("y", halfSize.z);
+        pHalfSize->SetDoubleAttribute("z", halfSize.y);
+
+        TiXmlElement* pAabb = new TiXmlElement("aabb");
+        pAabb->LinkEndChild(pCenter);
+        pAabb->LinkEndChild(pHalfSize);
+
+        pEntityElement->LinkEndChild(pAabb);
+      }
     }
 
     TiXmlElement* pSubEntities = new TiXmlElement("subentities");
@@ -525,6 +674,8 @@ namespace EasyOgreExporter
     if(pGameProperty)
     {
       pGameProperty->GetPropertyValue(camFov);
+
+      camFov = 2.0f * atan(tan(camFov / 2.0f) / GetCOREInterface()->GetRendImageAspect());
     }
     pCameraElement->SetDoubleAttribute("fov", camFov);
     parent->LinkEndChild(pCameraElement);
@@ -549,6 +700,17 @@ namespace EasyOgreExporter
 		pClippingElement->SetDoubleAttribute("near", neerClip);
 		pClippingElement->SetDoubleAttribute("far", farClip);
 		pCameraElement->LinkEndChild(pClippingElement);
+
+    IGameNode* pCameraTarget = pGameCamera->GetCameraTarget();
+    if (pCameraTarget)
+    {
+        TiXmlElement* pTargetElement = new TiXmlElement("trackTarget");
+        pTargetElement->SetAttribute("nodeName", ToUtf8(pCameraTarget->GetName()).c_str());
+
+        parent->LinkEndChild(pTargetElement);
+
+        writeNodeData(parent->Parent()->ToElement(), pCameraTarget, IGameObject::IGAME_UNKNOWN);
+    }
 
     id_counter++;
 		return pCameraElement;
@@ -606,14 +768,24 @@ namespace EasyOgreExporter
         return 0;
     }
 
+    float power = 1.0f;
+
+    IGameProperty* pGameProperty = pGameLight->GetLightColor();
+    if (pGameProperty)
+    {
+      pGameProperty->GetPropertyValue(power);
+    }
+
     TiXmlElement* pLightElement = new TiXmlElement("light");
 		pLightElement->SetAttribute("name", parent->Attribute("name"));
 		pLightElement->SetAttribute("id", id_counter);
+		pLightElement->SetAttribute("visible", getBoolString(pGameLight->IsLightOn()).c_str());
 		pLightElement->SetAttribute("type", getLightTypeString(lightType).c_str());
 		pLightElement->SetAttribute("castShadows", getBoolString(pGameLight->CastShadows()).c_str());
+		pLightElement->SetDoubleAttribute("power", power);
 		parent->LinkEndChild(pLightElement);
 
-    IGameProperty* pGameProperty = pGameLight->GetLightColor();
+    pGameProperty = pGameLight->GetLightColor();
     float propertyValue;
     Point3 lightColor;
     if(pGameProperty)
@@ -667,7 +839,7 @@ namespace EasyOgreExporter
 			pAttenuationElement->SetDoubleAttribute("range", attRange);
 			pAttenuationElement->SetDoubleAttribute("constant", attConst);
 			pAttenuationElement->SetDoubleAttribute("linear", attLinear);
-			pAttenuationElement->SetDoubleAttribute("quadratic", attQuad);
+			pAttenuationElement->SetDoubleAttribute("quadric", attQuad);
 			pLightElement->LinkEndChild(pAttenuationElement);
 		}
 
@@ -697,6 +869,17 @@ namespace EasyOgreExporter
 			pAttenuationElement->SetDoubleAttribute("falloff", rangeFalloff);
 			pLightElement->LinkEndChild(pAttenuationElement);
 		}
+
+    IGameNode* pLightTarget = pGameLight->GetLightTarget();
+    if (pLightTarget)
+    {
+        TiXmlElement* pTargetElement = new TiXmlElement("trackTarget");
+        pTargetElement->SetAttribute("nodeName", ToUtf8(pLightTarget->GetName()).c_str());
+
+        parent->LinkEndChild(pTargetElement);
+
+        writeNodeData(parent->Parent()->ToElement(), pLightTarget, IGameObject::IGAME_UNKNOWN);
+    }
 
     id_counter++;
 		return pLightElement;

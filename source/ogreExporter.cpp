@@ -142,6 +142,7 @@ namespace EasyOgreExporter
         CheckDlgButton(hWnd, IDC_CONVDDS, exp->convertToDDS);
         CheckDlgButton(hWnd, IDC_RESAMPLE_ANIMS, exp->resampleAnims);
         CheckDlgButton(hWnd, IDC_LOGS, exp->enableLogs);
+        CheckDlgButton(hWnd, IDC_MATERIALS, exp->exportMaterial);
     		
 #ifdef UNICODE
         //fill Shader mode combo box
@@ -367,6 +368,7 @@ namespace EasyOgreExporter
               exp->convertToDDS = IsDlgButtonChecked(hWnd, IDC_CONVDDS) ? true : false;
               exp->resampleAnims = IsDlgButtonChecked(hWnd, IDC_RESAMPLE_ANIMS) ? true : false;
               exp->enableLogs = IsDlgButtonChecked(hWnd, IDC_LOGS) ? true : false;
+              exp->exportMaterial = IsDlgButtonChecked(hWnd, IDC_MATERIALS) ? true : false;
 
               int shaderIdx = SendDlgItemMessage(hWnd, IDC_SHADERMODE, CB_GETCURSEL, 0, 0);
               if (shaderIdx != CB_ERR)
@@ -556,7 +558,7 @@ int	OgreSceneExporter::DoExport(const TCHAR* name, ExpInterface* pExpInterface, 
 #else
   std::string scenePath = name;
 #endif
-  for (int i=0; i<scenePath.length(); ++i)
+  for (int i=scenePath.length()-5; i<scenePath.length(); ++i)
   {
     scenePath[i]=tolower(scenePath[i]);
   }
@@ -585,21 +587,12 @@ int	OgreSceneExporter::DoExport(const TCHAR* name, ExpInterface* pExpInterface, 
   }
   
   std::string outDir = scenePath.substr(0, folderIndex);
-  std::string texOutDir = "bitmap";
-  std::string meshOutDir = "mesh";
-  std::string matOutDir = "material";
-  std::string progOutDir = "program";
   std::string partOutDir = "particle";
   std::string sceneFile = scenePath.substr(folderIndex + 1, (sceneIndex - (folderIndex + 1)));
   std::string resPrefix = sceneFile;
   
   // Setup the paramlist.
   params.outputDir = outDir.c_str();
-  params.texOutputDir = texOutDir.c_str();
-  params.meshOutputDir = meshOutDir.c_str();
-  params.materialOutputDir = matOutDir.c_str();
-  params.programOutputDir = progOutDir.c_str();
-  params.resPrefix = resPrefix.c_str();
   params.sceneFilename = sceneFile.c_str();
   
   int unitType = 0;
@@ -729,6 +722,10 @@ void OgreSceneExporter::loadExportConf(std::string path, ParamList &param)
     child = rootElem->FirstChildElement("IDC_LOGS");
     if (child)
       param.enableLogs = (child->GetText() && (atoi(child->GetText()) == 1)) ? true : false;
+
+    child = rootElem->FirstChildElement("IDC_MATERIALS");
+    if (child)
+      param.exportMaterial = (child->GetText() && (atoi(child->GetText()) == 1)) ? true : false;
 
     child = rootElem->FirstChildElement("IDC_SHADERMODE");
     if(child)
@@ -882,6 +879,11 @@ void OgreExporter::saveExportConf(std::string path)
   child->LinkEndChild(childText);
   contProperties->LinkEndChild(child);
 
+  child = new TiXmlElement("IDC_MATERIALS");
+  childText = new TiXmlText(m_params.exportMaterial ? "1" : "0");
+  child->LinkEndChild(childText);
+  contProperties->LinkEndChild(child);
+
   child = new TiXmlElement("IDC_CONVDDS");
   childText = new TiXmlText(m_params.convertToDDS ? "1" : "0");
   child->LinkEndChild(childText);
@@ -991,6 +993,249 @@ void OgreExporter::initIGameConf(std::string path)
 
   igameUserData->LinkEndChild(userData);
 
+  for (int i = 0; i < ANIMATIONS_COUNT; ++i)
+  {
+    TiXmlElement* animationId = new TiXmlElement("id");
+    animationId->LinkEndChild(new TiXmlText(std::to_string(200 + i * 4).c_str()));
+
+    TiXmlElement* animationName = new TiXmlElement("simplename");
+    animationName->LinkEndChild(new TiXmlText(std::string("#ANIMATION_" + std::to_string(i + 1) + " (format: NAME;FRAME_BEGIN;FRAME_END)").c_str()));
+
+    TiXmlElement* animationKey = new TiXmlElement("keyName");
+    animationKey->LinkEndChild(new TiXmlText(std::string("#ANIMATION_" + std::to_string(i + 1)).c_str()));
+
+    TiXmlElement* animationType = new TiXmlElement("type");
+    animationType->LinkEndChild(new TiXmlText("string"));
+
+    TiXmlElement* animation = new TiXmlElement("UserProperty");
+    animation->LinkEndChild(animationId);
+    animation->LinkEndChild(animationName);
+    animation->LinkEndChild(animationKey);
+    animation->LinkEndChild(animationType);
+
+    igameUserData->LinkEndChild(animation);
+
+    TiXmlElement* animationAutoplayId = new TiXmlElement("id");
+    animationAutoplayId->LinkEndChild(new TiXmlText(std::to_string(201 + i * 4).c_str()));
+
+    TiXmlElement* animationAutoplayName = new TiXmlElement("simplename");
+    animationAutoplayName->LinkEndChild(new TiXmlText(std::string("#ANIMATION_" + std::to_string(i + 1) + "_AUTOPLAY (default: 1)").c_str()));
+
+    TiXmlElement* animationAutoplayKey = new TiXmlElement("keyName");
+    animationAutoplayKey->LinkEndChild(new TiXmlText(std::string("#ANIMATION_" + std::to_string(i + 1) + "_AUTOPLAY").c_str()));
+
+    TiXmlElement* animationAutoplayType = new TiXmlElement("type");
+    animationAutoplayType->LinkEndChild(new TiXmlText("int"));
+
+    TiXmlElement* animationAutoplay = new TiXmlElement("UserProperty");
+    animationAutoplay->LinkEndChild(animationAutoplayId);
+    animationAutoplay->LinkEndChild(animationAutoplayName);
+    animationAutoplay->LinkEndChild(animationAutoplayKey);
+    animationAutoplay->LinkEndChild(animationAutoplayType);
+
+    igameUserData->LinkEndChild(animationAutoplay);
+
+    TiXmlElement* animationEnableId = new TiXmlElement("id");
+    animationEnableId->LinkEndChild(new TiXmlText(std::to_string(202 + i * 4).c_str()));
+
+    TiXmlElement* animationEnableName = new TiXmlElement("simplename");
+    animationEnableName->LinkEndChild(new TiXmlText(std::string("#ANIMATION_" + std::to_string(i + 1) + "_ENABLE (default: 1)").c_str()));
+
+    TiXmlElement* animationEnableKey = new TiXmlElement("keyName");
+    animationEnableKey->LinkEndChild(new TiXmlText(std::string("#ANIMATION_" + std::to_string(i + 1) + "_ENABLE").c_str()));
+
+    TiXmlElement* animationEnableType = new TiXmlElement("type");
+    animationEnableType->LinkEndChild(new TiXmlText("int"));
+
+    TiXmlElement* animationEnable = new TiXmlElement("UserProperty");
+    animationEnable->LinkEndChild(animationEnableId);
+    animationEnable->LinkEndChild(animationEnableName);
+    animationEnable->LinkEndChild(animationEnableKey);
+    animationEnable->LinkEndChild(animationEnableType);
+
+    igameUserData->LinkEndChild(animationEnable);
+
+    TiXmlElement* animationLoopId = new TiXmlElement("id");
+    animationLoopId->LinkEndChild(new TiXmlText(std::to_string(203 + i * 4).c_str()));
+
+    TiXmlElement* animationLoopName = new TiXmlElement("simplename");
+    animationLoopName->LinkEndChild(new TiXmlText(std::string("#ANIMATION_" + std::to_string(i + 1) + "_LOOP (default: 1)").c_str()));
+
+    TiXmlElement* animationLoopKey = new TiXmlElement("keyName");
+    animationLoopKey->LinkEndChild(new TiXmlText(std::string("#ANIMATION_" + std::to_string(i + 1) + "_LOOP").c_str()));
+
+    TiXmlElement* animationLoopType = new TiXmlElement("type");
+    animationLoopType->LinkEndChild(new TiXmlText("int"));
+
+    TiXmlElement* animationLoop = new TiXmlElement("UserProperty");
+    animationLoop->LinkEndChild(animationLoopId);
+    animationLoop->LinkEndChild(animationLoopName);
+    animationLoop->LinkEndChild(animationLoopKey);
+    animationLoop->LinkEndChild(animationLoopType);
+
+    igameUserData->LinkEndChild(animationLoop);
+  }
+
+  TiXmlElement* entityAabbId = new TiXmlElement("id");
+  entityAabbId->LinkEndChild(new TiXmlText("300"));
+
+  TiXmlElement* entityAabbName = new TiXmlElement("simplename");
+  entityAabbName->LinkEndChild(new TiXmlText("#ENTITY_AABB (format: CENTER.X CENTER.Y CENTER.Z;SIZE.X SIZE.Y SIZE.Z)"));
+
+  TiXmlElement* entityAabbKey = new TiXmlElement("keyName");
+  entityAabbKey->LinkEndChild(new TiXmlText("#ENTITY_AABB"));
+
+  TiXmlElement* entityAabbType = new TiXmlElement("type");
+  entityAabbType->LinkEndChild(new TiXmlText("string"));
+
+  TiXmlElement* entityAabb = new TiXmlElement("UserProperty");
+  entityAabb->LinkEndChild(entityAabbId);
+  entityAabb->LinkEndChild(entityAabbName);
+  entityAabb->LinkEndChild(entityAabbKey);
+  entityAabb->LinkEndChild(entityAabbType);
+
+  igameUserData->LinkEndChild(entityAabb);
+
+  TiXmlElement* entityInstanceId = new TiXmlElement("id");
+  entityInstanceId->LinkEndChild(new TiXmlText("301"));
+
+  TiXmlElement* entityInstanceName = new TiXmlElement("simplename");
+  entityInstanceName->LinkEndChild(new TiXmlText("#ENTITY_INSTANCE (default: empty)"));
+
+  TiXmlElement* entityInstanceKey = new TiXmlElement("keyName");
+  entityInstanceKey->LinkEndChild(new TiXmlText("#ENTITY_INSTANCE"));
+
+  TiXmlElement* entityInstanceType = new TiXmlElement("type");
+  entityInstanceType->LinkEndChild(new TiXmlText("string"));
+
+  TiXmlElement* entityInstance = new TiXmlElement("UserProperty");
+  entityInstance->LinkEndChild(entityInstanceId);
+  entityInstance->LinkEndChild(entityInstanceName);
+  entityInstance->LinkEndChild(entityInstanceKey);
+  entityInstance->LinkEndChild(entityInstanceType);
+
+  igameUserData->LinkEndChild(entityInstance);
+
+  TiXmlElement* entityRenderQueueId = new TiXmlElement("id");
+  entityRenderQueueId->LinkEndChild(new TiXmlText("302"));
+
+  TiXmlElement* entityRenderQueueName = new TiXmlElement("simplename");
+  entityRenderQueueName->LinkEndChild(new TiXmlText("#ENTITY_RENDERQUEUE (default: 0)"));
+
+  TiXmlElement* entityRenderQueueKey = new TiXmlElement("keyName");
+  entityRenderQueueKey->LinkEndChild(new TiXmlText("#ENTITY_RENDERQUEUE"));
+
+  TiXmlElement* entityRenderQueueType = new TiXmlElement("type");
+  entityRenderQueueType->LinkEndChild(new TiXmlText("int"));
+
+  TiXmlElement* entityRenderQueue = new TiXmlElement("UserProperty");
+  entityRenderQueue->LinkEndChild(entityRenderQueueId);
+  entityRenderQueue->LinkEndChild(entityRenderQueueName);
+  entityRenderQueue->LinkEndChild(entityRenderQueueKey);
+  entityRenderQueue->LinkEndChild(entityRenderQueueType);
+
+  igameUserData->LinkEndChild(entityRenderQueue);
+
+  TiXmlElement* entityVisibilityMaskId = new TiXmlElement("id");
+  entityVisibilityMaskId->LinkEndChild(new TiXmlText("303"));
+
+  TiXmlElement* entityVisibilityMaskName = new TiXmlElement("simplename");
+  entityVisibilityMaskName->LinkEndChild(new TiXmlText("#ENTITY_VISIBILITYMASK (default: 0x7)"));
+
+  TiXmlElement* entityVisibilityMaskKey = new TiXmlElement("keyName");
+  entityVisibilityMaskKey->LinkEndChild(new TiXmlText("#ENTITY_VISIBILITYMASK"));
+
+  TiXmlElement* entityVisibilityMaskType = new TiXmlElement("type");
+  entityVisibilityMaskType->LinkEndChild(new TiXmlText("string"));
+
+  TiXmlElement* entityVisibilityMask = new TiXmlElement("UserProperty");
+  entityVisibilityMask->LinkEndChild(entityVisibilityMaskId);
+  entityVisibilityMask->LinkEndChild(entityVisibilityMaskName);
+  entityVisibilityMask->LinkEndChild(entityVisibilityMaskKey);
+  entityVisibilityMask->LinkEndChild(entityVisibilityMaskType);
+
+  igameUserData->LinkEndChild(entityVisibilityMask);
+
+  TiXmlElement* reflectionId = new TiXmlElement("id");
+  reflectionId->LinkEndChild(new TiXmlText("400"));
+
+  TiXmlElement* reflectionName = new TiXmlElement("simplename");
+  reflectionName->LinkEndChild(new TiXmlText("#REFLECTION (default: 0)"));
+
+  TiXmlElement* reflectionKey = new TiXmlElement("keyName");
+  reflectionKey->LinkEndChild(new TiXmlText("#REFLECTION"));
+
+  TiXmlElement* reflectionType = new TiXmlElement("type");
+  reflectionType->LinkEndChild(new TiXmlText("int"));
+
+  TiXmlElement* reflection = new TiXmlElement("UserProperty");
+  reflection->LinkEndChild(reflectionId);
+  reflection->LinkEndChild(reflectionName);
+  reflection->LinkEndChild(reflectionKey);
+  reflection->LinkEndChild(reflectionType);
+
+  igameUserData->LinkEndChild(reflection);
+
+  TiXmlElement* reflectionClipId = new TiXmlElement("id");
+  reflectionClipId->LinkEndChild(new TiXmlText("401"));
+
+  TiXmlElement* reflectionClipName = new TiXmlElement("simplename");
+  reflectionClipName->LinkEndChild(new TiXmlText("#REFLECTION_CLIP (default: 0.0)"));
+
+  TiXmlElement* reflectionClipKey = new TiXmlElement("keyName");
+  reflectionClipKey->LinkEndChild(new TiXmlText("#REFLECTION_CLIP"));
+
+  TiXmlElement* reflectionClipType = new TiXmlElement("type");
+  reflectionClipType->LinkEndChild(new TiXmlText("float"));
+
+  TiXmlElement* reflectionClip = new TiXmlElement("UserProperty");
+  reflectionClip->LinkEndChild(reflectionClipId);
+  reflectionClip->LinkEndChild(reflectionClipName);
+  reflectionClip->LinkEndChild(reflectionClipKey);
+  reflectionClip->LinkEndChild(reflectionClipType);
+
+  igameUserData->LinkEndChild(reflectionClip);
+
+  TiXmlElement* reflectionVisibilityMaskId = new TiXmlElement("id");
+  reflectionVisibilityMaskId->LinkEndChild(new TiXmlText("402"));
+
+  TiXmlElement* reflectionVisibilityMaskName = new TiXmlElement("simplename");
+  reflectionVisibilityMaskName->LinkEndChild(new TiXmlText("#REFLECTION_VISIBILITYMASK (format: 0xVISIBILITY_MASK)"));
+
+  TiXmlElement* reflectionVisibilityMaskKey = new TiXmlElement("keyName");
+  reflectionVisibilityMaskKey->LinkEndChild(new TiXmlText("#REFLECTION_VISIBILITYMASK"));
+
+  TiXmlElement* reflectionVisibilityMaskType = new TiXmlElement("type");
+  reflectionVisibilityMaskType->LinkEndChild(new TiXmlText("string"));
+
+  TiXmlElement* reflectionVisibilityMask = new TiXmlElement("UserProperty");
+  reflectionVisibilityMask->LinkEndChild(reflectionVisibilityMaskId);
+  reflectionVisibilityMask->LinkEndChild(reflectionVisibilityMaskName);
+  reflectionVisibilityMask->LinkEndChild(reflectionVisibilityMaskKey);
+  reflectionVisibilityMask->LinkEndChild(reflectionVisibilityMaskType);
+
+  igameUserData->LinkEndChild(reflectionVisibilityMask);
+
+  TiXmlElement* reflectionWhitelistId = new TiXmlElement("id");
+  reflectionWhitelistId->LinkEndChild(new TiXmlText("403"));
+
+  TiXmlElement* reflectionWhitelistName = new TiXmlElement("simplename");
+  reflectionWhitelistName->LinkEndChild(new TiXmlText("#REFLECTION_WHITELIST (default: 1)"));
+
+  TiXmlElement* reflectionWhitelistKey = new TiXmlElement("keyName");
+  reflectionWhitelistKey->LinkEndChild(new TiXmlText("#REFLECTION_WHITELIST"));
+
+  TiXmlElement* reflectionWhitelistType = new TiXmlElement("type");
+  reflectionWhitelistType->LinkEndChild(new TiXmlText("int"));
+
+  TiXmlElement* reflectionWhitelist = new TiXmlElement("UserProperty");
+  reflectionWhitelist->LinkEndChild(reflectionWhitelistId);
+  reflectionWhitelist->LinkEndChild(reflectionWhitelistName);
+  reflectionWhitelist->LinkEndChild(reflectionWhitelistKey);
+  reflectionWhitelist->LinkEndChild(reflectionWhitelistType);
+
+  igameUserData->LinkEndChild(reflectionWhitelist);
+
   xmlDoc.SaveFile(path.c_str());
 }
 
@@ -1029,7 +1274,7 @@ bool OgreExporter::exportScene()
   // Ogre::Root ogreRoot;
   // Create singletons
   Ogre::LogManager logMgr;
-  Ogre::LogManager::getSingleton().createLog("Ogre.log", true);
+  Ogre::LogManager::getSingleton().createLog("Ogre.log", true, true, !m_params.enableLogs);
   Ogre::ResourceGroupManager rgm;
   Ogre::v1::MeshManager meshMgr;
   Ogre::v1::OldSkeletonManager skelMgr;
