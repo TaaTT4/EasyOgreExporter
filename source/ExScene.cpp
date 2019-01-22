@@ -783,7 +783,7 @@ namespace EasyOgreExporter
 		pLightElement->SetAttribute("id", id_counter);
 		pLightElement->SetAttribute("visible", getBoolString(pGameLight->IsLightOn()).c_str());
 		pLightElement->SetAttribute("type", getLightTypeString(lightType).c_str());
-		pLightElement->SetAttribute("castShadows", getBoolString(pGameLight->CastShadows()).c_str());
+		pLightElement->SetAttribute("castShadows", getBoolString(static_cast<LightObject*>(pGameLight->GetMaxObject())->GetShadow() != 0).c_str());
 		pLightElement->SetDoubleAttribute("power", power);
 		parent->LinkEndChild(pLightElement);
 
