@@ -1586,7 +1586,19 @@ bool OgreExporter::exportNode(IGameNode* pGameNode, TiXmlElement* parent)
                   else if (sceneData)
                   {
                     parent = sceneData->writeNodeData(parent, pGameNode, IGameObject::IGAME_MESH);
-                    sceneData->writeEntityData(parent, pGameNode, pGameMesh, lmat);
+
+                    INode* inst = getFirstInstance(pGameNode);
+                    if (inst->UserPropExists(_T("#ENTITY_INSTANCE")))
+                    {
+                      MSTR instRef;
+                      inst->GetUserPropString(_T("#ENTITY_INSTANCE"), instRef);
+
+                      parent->SetAttribute("instanceFile", (ToUtf8(instRef.data()) + ".scene").c_str());
+                    }
+                    else
+                    {
+                      sceneData->writeEntityData(parent, pGameNode, pGameMesh, lmat);
+                    }
                   }
                 }
               }

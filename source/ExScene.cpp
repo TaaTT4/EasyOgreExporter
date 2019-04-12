@@ -554,21 +554,9 @@ namespace EasyOgreExporter
       pEntityElement->SetAttribute("visibilityMask", ToUtf8(visibilityMask).c_str());
     }
 
-    INode* inst = getFirstInstance(pGameNode);
     std::string instName = mParams.resPrefix;
+    instName.append(getFirstInstanceName(pGameNode));
     
-    if (inst->UserPropExists(_T("#ENTITY_INSTANCE")))
-    {
-      MSTR instRef;
-      inst->GetUserPropString(_T("#ENTITY_INSTANCE"), instRef);
-
-      instName += ToUtf8(instRef.data());
-    }
-    else
-    {
-      instName.append(getFirstInstanceName(pGameNode));
-    }
-
     std::string meshPath = optimizeFileName(instName) + ".mesh";
 
     pEntityElement->SetAttribute("meshFile", meshPath.c_str());
