@@ -1076,28 +1076,8 @@ void OgreExporter::initIGameConf(std::string path)
     igameUserData->LinkEndChild(animationLoop);
   }
 
-  TiXmlElement* entityAabbId = new TiXmlElement("id");
-  entityAabbId->LinkEndChild(new TiXmlText("300"));
-
-  TiXmlElement* entityAabbName = new TiXmlElement("simplename");
-  entityAabbName->LinkEndChild(new TiXmlText("#ENTITY_AABB (format: CENTER.X CENTER.Y CENTER.Z;SIZE.X SIZE.Y SIZE.Z)"));
-
-  TiXmlElement* entityAabbKey = new TiXmlElement("keyName");
-  entityAabbKey->LinkEndChild(new TiXmlText("#ENTITY_AABB"));
-
-  TiXmlElement* entityAabbType = new TiXmlElement("type");
-  entityAabbType->LinkEndChild(new TiXmlText("string"));
-
-  TiXmlElement* entityAabb = new TiXmlElement("UserProperty");
-  entityAabb->LinkEndChild(entityAabbId);
-  entityAabb->LinkEndChild(entityAabbName);
-  entityAabb->LinkEndChild(entityAabbKey);
-  entityAabb->LinkEndChild(entityAabbType);
-
-  igameUserData->LinkEndChild(entityAabb);
-
   TiXmlElement* entityInstanceId = new TiXmlElement("id");
-  entityInstanceId->LinkEndChild(new TiXmlText("301"));
+  entityInstanceId->LinkEndChild(new TiXmlText("300"));
 
   TiXmlElement* entityInstanceName = new TiXmlElement("simplename");
   entityInstanceName->LinkEndChild(new TiXmlText("#ENTITY_INSTANCE (default: empty)"));
@@ -1117,7 +1097,7 @@ void OgreExporter::initIGameConf(std::string path)
   igameUserData->LinkEndChild(entityInstance);
 
   TiXmlElement* entityRenderQueueId = new TiXmlElement("id");
-  entityRenderQueueId->LinkEndChild(new TiXmlText("302"));
+  entityRenderQueueId->LinkEndChild(new TiXmlText("301"));
 
   TiXmlElement* entityRenderQueueName = new TiXmlElement("simplename");
   entityRenderQueueName->LinkEndChild(new TiXmlText("#ENTITY_RENDERQUEUE (default: 0)"));
@@ -1137,7 +1117,7 @@ void OgreExporter::initIGameConf(std::string path)
   igameUserData->LinkEndChild(entityRenderQueue);
 
   TiXmlElement* entityVisibilityMaskId = new TiXmlElement("id");
-  entityVisibilityMaskId->LinkEndChild(new TiXmlText("303"));
+  entityVisibilityMaskId->LinkEndChild(new TiXmlText("302"));
 
   TiXmlElement* entityVisibilityMaskName = new TiXmlElement("simplename");
   entityVisibilityMaskName->LinkEndChild(new TiXmlText("#ENTITY_VISIBILITYMASK (default: 0x7)"));
@@ -1586,7 +1566,19 @@ bool OgreExporter::exportNode(IGameNode* pGameNode, TiXmlElement* parent)
                   else if (sceneData)
                   {
                     parent = sceneData->writeNodeData(parent, pGameNode, IGameObject::IGAME_MESH);
-                    sceneData->writeEntityData(parent, pGameNode, pGameMesh, lmat);
+
+                    INode* inst = getFirstInstance(pGameNode);
+                    if (inst->UserPropExists(_T("#ENTITY_INSTANCE")))
+                    {
+                      MSTR instRef;
+                      inst->GetUserPropString(_T("#ENTITY_INSTANCE"), instRef);
+
+                      parent->SetAttribute("instanceFile", (ToUtf8(instRef.data()) + ".scene").c_str());
+                    }
+                    else
+                    {
+                      sceneData->writeEntityData(parent, pGameNode, pGameMesh, lmat);
+                    }
                   }
                 }
               }

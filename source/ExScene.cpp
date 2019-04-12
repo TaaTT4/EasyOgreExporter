@@ -554,21 +554,9 @@ namespace EasyOgreExporter
       pEntityElement->SetAttribute("visibilityMask", ToUtf8(visibilityMask).c_str());
     }
 
-    INode* inst = getFirstInstance(pGameNode);
     std::string instName = mParams.resPrefix;
+    instName.append(getFirstInstanceName(pGameNode));
     
-    if (inst->UserPropExists(_T("#ENTITY_INSTANCE")))
-    {
-      MSTR instRef;
-      inst->GetUserPropString(_T("#ENTITY_INSTANCE"), instRef);
-
-      instName += ToUtf8(instRef.data());
-    }
-    else
-    {
-      instName.append(getFirstInstanceName(pGameNode));
-    }
-
     std::string meshPath = optimizeFileName(instName) + ".mesh";
 
     pEntityElement->SetAttribute("meshFile", meshPath.c_str());
@@ -606,36 +594,6 @@ namespace EasyOgreExporter
 
       pUserDataElement->LinkEndChild(pUserDataText);
       pEntityElement->LinkEndChild(pUserDataElement);
-    }
-
-    pGameProperty = pc->QueryProperty(_T("#ENTITY_AABB"));
-    if (pGameProperty)
-    {
-      const MCHAR* aabb;
-      pGameProperty->GetPropertyValue(aabb);
-
-      Ogre::StringVector params = Ogre::StringUtil::split(ToUtf8(aabb), ";");
-      if (params.size() == 2)
-      {
-        Ogre::Vector3 center = Ogre::StringConverter::parseVector3(params[0]);
-        Ogre::Vector3 halfSize = Ogre::StringConverter::parseVector3(params[1]) * 0.5f;
-
-        TiXmlElement* pCenter = new TiXmlElement("center");
-        pCenter->SetDoubleAttribute("x", center.x);
-        pCenter->SetDoubleAttribute("y", center.z);
-        pCenter->SetDoubleAttribute("z", -center.y);
-
-        TiXmlElement* pHalfSize = new TiXmlElement("halfSize");
-        pHalfSize->SetDoubleAttribute("x", halfSize.x);
-        pHalfSize->SetDoubleAttribute("y", halfSize.z);
-        pHalfSize->SetDoubleAttribute("z", halfSize.y);
-
-        TiXmlElement* pAabb = new TiXmlElement("aabb");
-        pAabb->LinkEndChild(pCenter);
-        pAabb->LinkEndChild(pHalfSize);
-
-        pEntityElement->LinkEndChild(pAabb);
-      }
     }
 
     TiXmlElement* pSubEntities = new TiXmlElement("subentities");
